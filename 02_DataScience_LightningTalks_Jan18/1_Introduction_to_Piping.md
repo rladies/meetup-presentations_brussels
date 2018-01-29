@@ -47,12 +47,12 @@ don't remember who... * <br>
 
 ### **Advantages of using pipes:**
 
-Using pipelines has some advantages: - Structuring sequences of data
-operations left-to-right, making it more readable for humans - Avoiding
-nested function calls - Minimizing the need for local variables - Making
-it easy to add steps anywhere in the sequence of operations if the
-output is not entirely what you desired - Making it easy to stepwise
-explore someone elses code as you can highlight step by step and run it.
+Using pipelines has some advantages: 
+- Structuring sequences of data operations left-to-right, making it more readable for humans 
+- Avoiding nested function calls 
+- Minimizing the need for local variables 
+- Making it easy to add steps anywhere in the sequence of operations if the output is not entirely what you desired 
+- Making it easy to stepwise explore someone elses code as you can highlight step by step and run it.
 
 There are some watch-outs in using pipes inside functions and packages
 though. If something goes wrong, you can get undecipherable error
