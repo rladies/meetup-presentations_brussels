@@ -155,7 +155,8 @@ pizza &lt;- take_out(pie_tmp, oven)</code></pre>
 <div id="advantages-of-using-pipes" class="section level3">
 <h3><strong>Advantages of using pipes:</strong></h3>
 <p>Using pipelines has some advantages: - Structuring sequences of data operations left-to-right, making it more readable for humans - Avoiding nested function calls - Minimizing the need for local variables - Making it easy to add steps anywhere in the sequence of operations if the output is not entirely what you desired - Making it easy to stepwise explore someone elses code as you can highlight step by step and run it.</p>
-<p>There are some watch-outs in using pipes inside functions and packages though. <br></p>
+<p>There are some watch-outs in using pipes inside functions and packages though. If something goes wrong, you can get undecipherable error messages with very clue on what went wrong. The general advice is to use temporary variables inside function, which are local anyway and won’t live outside your function.</p>
+<p><br></p>
 <p><strong>Quick tip: </strong><br />
 There is a pre-programmed shortcut in Rstudio: Ctlr+Shift+M. I personally did not find that an easy shortcut to type blindly on either my Azerty or Qwerty keyboards, so I changed it to Ctlr+P. You can change shortcuts via Rstudio &gt; Tools &gt; Modify Keyboard Shortcuts. <br><br></p>
 <hr />
@@ -228,18 +229,18 @@ In some cases I have added a <code>glimpse()</code> statement to allow you to se
 <pre class="r"><code>kickstarter_sample %&gt;% 
   select(main_category, category, goal, currency)</code></pre>
 <pre><code>## # A tibble: 100 x 4
-##    main_category category        goal currency
-##    &lt;chr&gt;         &lt;chr&gt;          &lt;dbl&gt; &lt;chr&gt;   
-##  1 Games         Video Games    10000 USD     
-##  2 Film &amp; Video  Narrative Film 30000 USD     
-##  3 Art           Art            10000 USD     
-##  4 Crafts        Printing       15000 DKK     
-##  5 Comics        Comics          2000 USD     
-##  6 Publishing    Poetry          8000 USD     
-##  7 Games         Video Games     1501 USD     
-##  8 Food          Small Batch    25000 USD     
-##  9 Film &amp; Video  Action          1000 USD     
-## 10 Crafts        Crafts          5000 USD     
+##    main_category category         goal currency
+##    &lt;chr&gt;         &lt;chr&gt;           &lt;dbl&gt; &lt;chr&gt;   
+##  1 Film &amp; Video  Animation       10000 USD     
+##  2 Games         Games           50000 USD     
+##  3 Crafts        Crafts            300 CAD     
+##  4 Music         Music            1000 USD     
+##  5 Film &amp; Video  Shorts           3000 USD     
+##  6 Design        Product Design  12000 USD     
+##  7 Technology    Hardware        30000 USD     
+##  8 Art           Performance Art  3800 USD     
+##  9 Art           Digital Art      2000 USD     
+## 10 Publishing    Fiction          1300 USD     
 ## # ... with 90 more rows</code></pre>
 <p>If you have many columns and you want to bring just a few to the front, you can finish your select operation by using the <code>everything()</code> statement, which will add all the remaining columns and save a lot of typing.</p>
 <pre class="r"><code>kickstarter_sample %&gt;%
@@ -247,18 +248,18 @@ In some cases I have added a <code>glimpse()</code> statement to allow you to se
   glimpse</code></pre>
 <pre><code>## Observations: 100
 ## Variables: 12
-## $ main_category &lt;chr&gt; &quot;Games&quot;, &quot;Film &amp; Video&quot;, &quot;Art&quot;, &quot;Crafts&quot;, &quot;Comic...
-## $ category      &lt;chr&gt; &quot;Video Games&quot;, &quot;Narrative Film&quot;, &quot;Art&quot;, &quot;Printin...
-## $ ID            &lt;chr&gt; &quot;928179407&quot;, &quot;2131450892&quot;, &quot;998668803&quot;, &quot;1048191...
-## $ name          &lt;chr&gt; &quot;Grimm: A Theatrical Tale&quot;, &quot;PRELUDE (Canceled)&quot;...
-## $ date_launched &lt;dttm&gt; 2017-07-03 03:41:11, 2011-08-04 06:37:10, 2013-...
-## $ date_deadline &lt;dttm&gt; 2017-08-02 03:41:11, 2011-10-03 06:37:10, 2013-...
-## $ currency      &lt;chr&gt; &quot;USD&quot;, &quot;USD&quot;, &quot;USD&quot;, &quot;DKK&quot;, &quot;USD&quot;, &quot;USD&quot;, &quot;USD&quot;,...
-## $ goal          &lt;dbl&gt; 10000, 30000, 10000, 15000, 2000, 8000, 1501, 25...
-## $ pledged       &lt;dbl&gt; 27.0, 2375.0, 12467.0, 600.0, 2496.0, 9355.0, 27...
-## $ state         &lt;chr&gt; &quot;failed&quot;, &quot;canceled&quot;, &quot;successful&quot;, &quot;canceled&quot;, ...
-## $ backers       &lt;int&gt; 3, 8, 165, 2, 48, 52, 73, 3, 2, 10, 1, 2, 69, 0,...
-## $ country       &lt;chr&gt; &quot;US&quot;, &quot;US&quot;, &quot;US&quot;, &quot;DK&quot;, &quot;US&quot;, &quot;US&quot;, &quot;US&quot;, &quot;US&quot;, ...</code></pre>
+## $ main_category &lt;chr&gt; &quot;Film &amp; Video&quot;, &quot;Games&quot;, &quot;Crafts&quot;, &quot;Music&quot;, &quot;Fil...
+## $ category      &lt;chr&gt; &quot;Animation&quot;, &quot;Games&quot;, &quot;Crafts&quot;, &quot;Music&quot;, &quot;Shorts...
+## $ ID            &lt;chr&gt; &quot;568117989&quot;, &quot;1482424255&quot;, &quot;400435132&quot;, &quot;1368554...
+## $ name          &lt;chr&gt; &quot;Team S.M.I.L.E.&quot;, &quot;Insect Wars&quot;, &quot;Tom Baker Fan...
+## $ date_launched &lt;dttm&gt; 2016-06-03 23:38:33, 2016-08-17 18:04:02, 2016-...
+## $ date_deadline &lt;dttm&gt; 2016-07-03 23:38:33, 2016-09-16 18:04:02, 2016-...
+## $ currency      &lt;chr&gt; &quot;USD&quot;, &quot;USD&quot;, &quot;CAD&quot;, &quot;USD&quot;, &quot;USD&quot;, &quot;USD&quot;, &quot;USD&quot;,...
+## $ goal          &lt;dbl&gt; 10000, 50000, 300, 1000, 3000, 12000, 30000, 380...
+## $ pledged       &lt;dbl&gt; 26.00, 10.00, 105.00, 1030.00, 310.00, 2.00, 500...
+## $ state         &lt;chr&gt; &quot;failed&quot;, &quot;failed&quot;, &quot;failed&quot;, &quot;successful&quot;, &quot;fai...
+## $ backers       &lt;int&gt; 2, 1, 2, 12, 6, 1, 7, 114, 1, 14, 1, 25, 454, 39...
+## $ country       &lt;chr&gt; &quot;US&quot;, &quot;US&quot;, &quot;CA&quot;, &quot;US&quot;, &quot;US&quot;, &quot;US&quot;, &quot;US&quot;, &quot;US&quot;, ...</code></pre>
 <p><br></p>
 </div>
 <div id="renaming-a-column" class="section level3">
@@ -267,18 +268,18 @@ In some cases I have added a <code>glimpse()</code> statement to allow you to se
 <pre class="r"><code>kickstarter_sample %&gt;%
   select(main_category, category, project = name, status = state)</code></pre>
 <pre><code>## # A tibble: 100 x 4
-##    main_category category       project                           status  
-##    &lt;chr&gt;         &lt;chr&gt;          &lt;chr&gt;                             &lt;chr&gt;   
-##  1 Games         Video Games    Grimm: A Theatrical Tale          failed  
-##  2 Film &amp; Video  Narrative Film PRELUDE (Canceled)                canceled
-##  3 Art           Art            &quot;\&quot;1008\&quot; A visual contemplative~ success~
-##  4 Crafts        Printing       boxity - decorative storage rese~ canceled
-##  5 Comics        Comics         NAZ, A Historical Horror Comic    success~
-##  6 Publishing    Poetry         INSURANCE EDITIONS: Acme Rubbers~ success~
-##  7 Games         Video Games    Minecraft Photo Book              success~
-##  8 Food          Small Batch    Craib-Bay                         failed  
-##  9 Film &amp; Video  Action         Hamlet: Blood and Steel -- A Fra~ canceled
-## 10 Crafts        Crafts         Rotten Apple Fight!               failed  
+##    main_category category        project                          status  
+##    &lt;chr&gt;         &lt;chr&gt;           &lt;chr&gt;                            &lt;chr&gt;   
+##  1 Film &amp; Video  Animation       Team S.M.I.L.E.                  failed  
+##  2 Games         Games           Insect Wars                      failed  
+##  3 Crafts        Crafts          Tom Baker Fan d Painted Shirts ~ failed  
+##  4 Music         Music           Be a part of funding Heroes new~ success~
+##  5 Film &amp; Video  Shorts          Redemption for an Assassin       failed  
+##  6 Design        Product Design  Fitted biodegradable toilet sea~ failed  
+##  7 Technology    Hardware        Solar Driven Ground Cooling For~ failed  
+##  8 Art           Performance Art Giants &amp; Pilgrims: Bellwether    success~
+##  9 Art           Digital Art     Remix                            failed  
+## 10 Publishing    Fiction         The R Word (take 2)              success~
 ## # ... with 90 more rows</code></pre>
 <p>If you want to retain all columns, you can rename by adding a ‘rename’ statement.</p>
 <pre class="r"><code>kickstarter_sample %&gt;% 
@@ -287,18 +288,18 @@ In some cases I have added a <code>glimpse()</code> statement to allow you to se
   glimpse</code></pre>
 <pre><code>## Observations: 100
 ## Variables: 12
-## $ ID            &lt;chr&gt; &quot;928179407&quot;, &quot;2131450892&quot;, &quot;998668803&quot;, &quot;1048191...
-## $ project       &lt;chr&gt; &quot;Grimm: A Theatrical Tale&quot;, &quot;PRELUDE (Canceled)&quot;...
-## $ main_category &lt;chr&gt; &quot;Games&quot;, &quot;Film &amp; Video&quot;, &quot;Art&quot;, &quot;Crafts&quot;, &quot;Comic...
-## $ category      &lt;chr&gt; &quot;Video Games&quot;, &quot;Narrative Film&quot;, &quot;Art&quot;, &quot;Printin...
-## $ launch_date   &lt;dttm&gt; 2017-07-03 03:41:11, 2011-08-04 06:37:10, 2013-...
-## $ deadline      &lt;dttm&gt; 2017-08-02 03:41:11, 2011-10-03 06:37:10, 2013-...
-## $ currency      &lt;chr&gt; &quot;USD&quot;, &quot;USD&quot;, &quot;USD&quot;, &quot;DKK&quot;, &quot;USD&quot;, &quot;USD&quot;, &quot;USD&quot;,...
-## $ goal          &lt;dbl&gt; 10000, 30000, 10000, 15000, 2000, 8000, 1501, 25...
-## $ pledged       &lt;dbl&gt; 27.0, 2375.0, 12467.0, 600.0, 2496.0, 9355.0, 27...
-## $ status        &lt;chr&gt; &quot;failed&quot;, &quot;canceled&quot;, &quot;successful&quot;, &quot;canceled&quot;, ...
-## $ backers       &lt;int&gt; 3, 8, 165, 2, 48, 52, 73, 3, 2, 10, 1, 2, 69, 0,...
-## $ country       &lt;chr&gt; &quot;US&quot;, &quot;US&quot;, &quot;US&quot;, &quot;DK&quot;, &quot;US&quot;, &quot;US&quot;, &quot;US&quot;, &quot;US&quot;, ...</code></pre>
+## $ ID            &lt;chr&gt; &quot;568117989&quot;, &quot;1482424255&quot;, &quot;400435132&quot;, &quot;1368554...
+## $ project       &lt;chr&gt; &quot;Team S.M.I.L.E.&quot;, &quot;Insect Wars&quot;, &quot;Tom Baker Fan...
+## $ main_category &lt;chr&gt; &quot;Film &amp; Video&quot;, &quot;Games&quot;, &quot;Crafts&quot;, &quot;Music&quot;, &quot;Fil...
+## $ category      &lt;chr&gt; &quot;Animation&quot;, &quot;Games&quot;, &quot;Crafts&quot;, &quot;Music&quot;, &quot;Shorts...
+## $ launch_date   &lt;dttm&gt; 2016-06-03 23:38:33, 2016-08-17 18:04:02, 2016-...
+## $ deadline      &lt;dttm&gt; 2016-07-03 23:38:33, 2016-09-16 18:04:02, 2016-...
+## $ currency      &lt;chr&gt; &quot;USD&quot;, &quot;USD&quot;, &quot;CAD&quot;, &quot;USD&quot;, &quot;USD&quot;, &quot;USD&quot;, &quot;USD&quot;,...
+## $ goal          &lt;dbl&gt; 10000, 50000, 300, 1000, 3000, 12000, 30000, 380...
+## $ pledged       &lt;dbl&gt; 26.00, 10.00, 105.00, 1030.00, 310.00, 2.00, 500...
+## $ status        &lt;chr&gt; &quot;failed&quot;, &quot;failed&quot;, &quot;failed&quot;, &quot;successful&quot;, &quot;fai...
+## $ backers       &lt;int&gt; 2, 1, 2, 12, 6, 1, 7, 114, 1, 14, 1, 25, 454, 39...
+## $ country       &lt;chr&gt; &quot;US&quot;, &quot;US&quot;, &quot;CA&quot;, &quot;US&quot;, &quot;US&quot;, &quot;US&quot;, &quot;US&quot;, &quot;US&quot;, ...</code></pre>
 <p><br></p>
 </div>
 <div id="selecting-columns-by-their-full-name" class="section level3">
@@ -309,16 +310,16 @@ In some cases I have added a <code>glimpse()</code> statement to allow you to se
 <pre><code>## # A tibble: 100 x 3
 ##    main_category state      name                                          
 ##    &lt;chr&gt;         &lt;chr&gt;      &lt;chr&gt;                                         
-##  1 Games         failed     Grimm: A Theatrical Tale                      
-##  2 Film &amp; Video  canceled   PRELUDE (Canceled)                            
-##  3 Art           successful &quot;\&quot;1008\&quot; A visual contemplative journey&quot;     
-##  4 Crafts        canceled   boxity - decorative storage resembling city b~
-##  5 Comics        successful NAZ, A Historical Horror Comic                
-##  6 Publishing    successful INSURANCE EDITIONS: Acme Rubbers &amp; The Triump~
-##  7 Games         successful Minecraft Photo Book                          
-##  8 Food          failed     Craib-Bay                                     
-##  9 Film &amp; Video  canceled   Hamlet: Blood and Steel -- A Franchise Reboot~
-## 10 Crafts        failed     Rotten Apple Fight!                           
+##  1 Film &amp; Video  failed     Team S.M.I.L.E.                               
+##  2 Games         failed     Insect Wars                                   
+##  3 Crafts        failed     Tom Baker Fan d Painted Shirts , by WHOSmakin~
+##  4 Music         successful Be a part of funding Heroes new album!        
+##  5 Film &amp; Video  failed     Redemption for an Assassin                    
+##  6 Design        failed     Fitted biodegradable toilet seat cover for pu~
+##  7 Technology    failed     Solar Driven Ground Cooling For Permafrost Fo~
+##  8 Art           successful Giants &amp; Pilgrims: Bellwether                 
+##  9 Art           failed     Remix                                         
+## 10 Publishing    successful The R Word (take 2)                           
 ## # ... with 90 more rows</code></pre>
 <p>If want to add a lot of columns, it can save a lot of space to have a good look at your data and see whether you can’t get to your selection by using chunks, deselecting or even deselect a column and re-add it straight after.</p>
 <p>To add a chunk of columns use the <code>start_col:end_col</code> syntax:</p>
@@ -327,16 +328,16 @@ In some cases I have added a <code>glimpse()</code> statement to allow you to se
 <pre><code>## # A tibble: 100 x 5
 ##    name                               main_category currency  goal pledged
 ##    &lt;chr&gt;                              &lt;chr&gt;         &lt;chr&gt;    &lt;dbl&gt;   &lt;dbl&gt;
-##  1 Grimm: A Theatrical Tale           Games         USD      10000    27.0
-##  2 PRELUDE (Canceled)                 Film &amp; Video  USD      30000  2375  
-##  3 &quot;\&quot;1008\&quot; A visual contemplative ~ Art           USD      10000 12467  
-##  4 boxity - decorative storage resem~ Crafts        DKK      15000   600  
-##  5 NAZ, A Historical Horror Comic     Comics        USD       2000  2496  
-##  6 INSURANCE EDITIONS: Acme Rubbers ~ Publishing    USD       8000  9355  
-##  7 Minecraft Photo Book               Games         USD       1501  2742  
-##  8 Craib-Bay                          Food          USD      25000   175  
-##  9 Hamlet: Blood and Steel -- A Fran~ Film &amp; Video  USD       1000   250  
-## 10 Rotten Apple Fight!                Crafts        USD       5000   772  
+##  1 Team S.M.I.L.E.                    Film &amp; Video  USD      10000   26.0 
+##  2 Insect Wars                        Games         USD      50000   10.0 
+##  3 Tom Baker Fan d Painted Shirts , ~ Crafts        CAD        300  105   
+##  4 Be a part of funding Heroes new a~ Music         USD       1000 1030   
+##  5 Redemption for an Assassin         Film &amp; Video  USD       3000  310   
+##  6 Fitted biodegradable toilet seat ~ Design        USD      12000    2.00
+##  7 Solar Driven Ground Cooling For P~ Technology    USD      30000  500   
+##  8 Giants &amp; Pilgrims: Bellwether      Art           USD       3800 7768   
+##  9 Remix                              Art           USD       2000   25.0 
+## 10 The R Word (take 2)                Publishing    USD       1300 1340   
 ## # ... with 90 more rows</code></pre>
 <p>An alternative is to <strong>deselect columns</strong> by adding a minus sign in front of the column name. You can also deselect chunks of columns. It’s even possible to deselect a whole chunk, and then re-add a column again (as long as it is in the same select statement)</p>
 <pre class="r"><code>#deselecting one column (ID), deselecting all columns from date_launched until the end, but re-adding some columns from that large chunk.
@@ -345,16 +346,16 @@ kickstarter_sample %&gt;%
 <pre><code>## # A tibble: 100 x 6
 ##    name                    main_category category   currency  goal pledged
 ##    &lt;chr&gt;                   &lt;chr&gt;         &lt;chr&gt;      &lt;chr&gt;    &lt;dbl&gt;   &lt;dbl&gt;
-##  1 Grimm: A Theatrical Ta~ Games         Video Gam~ USD      10000    27.0
-##  2 PRELUDE (Canceled)      Film &amp; Video  Narrative~ USD      30000  2375  
-##  3 &quot;\&quot;1008\&quot; A visual con~ Art           Art        USD      10000 12467  
-##  4 boxity - decorative st~ Crafts        Printing   DKK      15000   600  
-##  5 NAZ, A Historical Horr~ Comics        Comics     USD       2000  2496  
-##  6 INSURANCE EDITIONS: Ac~ Publishing    Poetry     USD       8000  9355  
-##  7 Minecraft Photo Book    Games         Video Gam~ USD       1501  2742  
-##  8 Craib-Bay               Food          Small Bat~ USD      25000   175  
-##  9 Hamlet: Blood and Stee~ Film &amp; Video  Action     USD       1000   250  
-## 10 Rotten Apple Fight!     Crafts        Crafts     USD       5000   772  
+##  1 Team S.M.I.L.E.         Film &amp; Video  Animation  USD      10000   26.0 
+##  2 Insect Wars             Games         Games      USD      50000   10.0 
+##  3 Tom Baker Fan d Painte~ Crafts        Crafts     CAD        300  105   
+##  4 Be a part of funding H~ Music         Music      USD       1000 1030   
+##  5 Redemption for an Assa~ Film &amp; Video  Shorts     USD       3000  310   
+##  6 Fitted biodegradable t~ Design        Product D~ USD      12000    2.00
+##  7 Solar Driven Ground Co~ Technology    Hardware   USD      30000  500   
+##  8 Giants &amp; Pilgrims: Bel~ Art           Performan~ USD       3800 7768   
+##  9 Remix                   Art           Digital A~ USD       2000   25.0 
+## 10 The R Word (take 2)     Publishing    Fiction    USD       1300 1340   
 ## # ... with 90 more rows</code></pre>
 <p><br></p>
 </div>
@@ -368,16 +369,16 @@ kickstarter_sample %&gt;%
 <pre><code>## # A tibble: 100 x 6
 ##    main_category category  date_launched       date_deadline       name   
 ##    &lt;chr&gt;         &lt;chr&gt;     &lt;dttm&gt;              &lt;dttm&gt;              &lt;chr&gt;  
-##  1 Games         Video Ga~ 2017-07-03 03:41:11 2017-08-02 03:41:11 Grimm:~
-##  2 Film &amp; Video  Narrativ~ 2011-08-04 06:37:10 2011-10-03 06:37:10 PRELUD~
-##  3 Art           Art       2013-11-25 23:32:42 2013-12-22 01:28:00 &quot;\&quot;100~
-##  4 Crafts        Printing  2014-11-10 19:19:20 2014-12-20 19:19:20 boxity~
-##  5 Comics        Comics    2016-03-15 15:59:22 2016-04-29 16:59:22 NAZ, A~
-##  6 Publishing    Poetry    2017-10-17 19:40:19 2017-11-21 06:00:00 INSURA~
-##  7 Games         Video Ga~ 2013-08-01 00:12:27 2013-09-04 01:59:00 Minecr~
-##  8 Food          Small Ba~ 2017-04-16 08:59:49 2017-06-15 08:59:49 Craib-~
-##  9 Film &amp; Video  Action    2015-07-20 10:21:03 2015-08-22 04:00:00 Hamlet~
-## 10 Crafts        Crafts    2009-07-25 05:14:55 2009-09-25 03:24:00 Rotten~
+##  1 Film &amp; Video  Animation 2016-06-03 23:38:33 2016-07-03 23:38:33 Team S~
+##  2 Games         Games     2016-08-17 18:04:02 2016-09-16 18:04:02 Insect~
+##  3 Crafts        Crafts    2016-05-21 05:22:07 2016-06-12 06:46:00 Tom Ba~
+##  4 Music         Music     2011-04-23 11:50:01 2011-05-24 05:00:00 Be a p~
+##  5 Film &amp; Video  Shorts    2011-06-23 22:45:47 2011-07-23 22:45:47 Redemp~
+##  6 Design        Product ~ 2016-04-09 22:37:17 2016-06-02 01:30:00 Fitted~
+##  7 Technology    Hardware  2016-10-11 17:46:17 2016-11-10 17:46:17 Solar ~
+##  8 Art           Performa~ 2017-02-01 04:16:17 2017-02-18 22:23:00 Giants~
+##  9 Art           Digital ~ 2015-03-19 23:34:57 2015-05-01 01:12:00 Remix  
+## 10 Publishing    Fiction   2015-09-12 02:50:03 2015-10-12 02:50:03 The R ~
 ## # ... with 90 more rows, and 1 more variable: state &lt;chr&gt;</code></pre>
 <p><br></p>
 </div>
@@ -389,18 +390,18 @@ The below example code will add any columns where you have ‘a.e’ in the titl
 kickstarter_sample %&gt;%
   select(matches(&quot;[^d]a.e&quot;))</code></pre>
 <pre><code>## # A tibble: 100 x 4
-##    name                                 main_category category     state  
-##    &lt;chr&gt;                                &lt;chr&gt;         &lt;chr&gt;        &lt;chr&gt;  
-##  1 Grimm: A Theatrical Tale             Games         Video Games  failed 
-##  2 PRELUDE (Canceled)                   Film &amp; Video  Narrative F~ cancel~
-##  3 &quot;\&quot;1008\&quot; A visual contemplative jo~ Art           Art          succes~
-##  4 boxity - decorative storage resembl~ Crafts        Printing     cancel~
-##  5 NAZ, A Historical Horror Comic       Comics        Comics       succes~
-##  6 INSURANCE EDITIONS: Acme Rubbers &amp; ~ Publishing    Poetry       succes~
-##  7 Minecraft Photo Book                 Games         Video Games  succes~
-##  8 Craib-Bay                            Food          Small Batch  failed 
-##  9 Hamlet: Blood and Steel -- A Franch~ Film &amp; Video  Action       cancel~
-## 10 Rotten Apple Fight!                  Crafts        Crafts       failed 
+##    name                                main_category category     state   
+##    &lt;chr&gt;                               &lt;chr&gt;         &lt;chr&gt;        &lt;chr&gt;   
+##  1 Team S.M.I.L.E.                     Film &amp; Video  Animation    failed  
+##  2 Insect Wars                         Games         Games        failed  
+##  3 Tom Baker Fan d Painted Shirts , b~ Crafts        Crafts       failed  
+##  4 Be a part of funding Heroes new al~ Music         Music        success~
+##  5 Redemption for an Assassin          Film &amp; Video  Shorts       failed  
+##  6 Fitted biodegradable toilet seat c~ Design        Product Des~ failed  
+##  7 Solar Driven Ground Cooling For Pe~ Technology    Hardware     failed  
+##  8 Giants &amp; Pilgrims: Bellwether       Art           Performance~ success~
+##  9 Remix                               Art           Digital Art  failed  
+## 10 The R Word (take 2)                 Publishing    Fiction      success~
 ## # ... with 90 more rows</code></pre>
 <p><br></p>
 </div>
@@ -413,16 +414,16 @@ kickstarter_sample %&gt;%
 <pre><code>## # A tibble: 100 x 3
 ##     goal pledged backers
 ##    &lt;dbl&gt;   &lt;dbl&gt;   &lt;int&gt;
-##  1 10000    27.0       3
-##  2 30000  2375         8
-##  3 10000 12467       165
-##  4 15000   600         2
-##  5  2000  2496        48
-##  6  8000  9355        52
-##  7  1501  2742        73
-##  8 25000   175         3
-##  9  1000   250         2
-## 10  5000   772        10
+##  1 10000   26.0        2
+##  2 50000   10.0        1
+##  3   300  105          2
+##  4  1000 1030         12
+##  5  3000  310          6
+##  6 12000    2.00       1
+##  7 30000  500          7
+##  8  3800 7768        114
+##  9  2000   25.0        1
+## 10  1300 1340         14
 ## # ... with 90 more rows</code></pre>
 <p>You can also select the negation but in this case you will need to add a tilde to ensure that you still pass a function to <code>select_if</code>.</p>
 <pre class="r"><code>kickstarter_sample %&gt;%
@@ -430,16 +431,16 @@ kickstarter_sample %&gt;%
 <pre><code>## # A tibble: 100 x 5
 ##    date_launched       date_deadline        goal pledged backers
 ##    &lt;dttm&gt;              &lt;dttm&gt;              &lt;dbl&gt;   &lt;dbl&gt;   &lt;int&gt;
-##  1 2017-07-03 03:41:11 2017-08-02 03:41:11 10000    27.0       3
-##  2 2011-08-04 06:37:10 2011-10-03 06:37:10 30000  2375         8
-##  3 2013-11-25 23:32:42 2013-12-22 01:28:00 10000 12467       165
-##  4 2014-11-10 19:19:20 2014-12-20 19:19:20 15000   600         2
-##  5 2016-03-15 15:59:22 2016-04-29 16:59:22  2000  2496        48
-##  6 2017-10-17 19:40:19 2017-11-21 06:00:00  8000  9355        52
-##  7 2013-08-01 00:12:27 2013-09-04 01:59:00  1501  2742        73
-##  8 2017-04-16 08:59:49 2017-06-15 08:59:49 25000   175         3
-##  9 2015-07-20 10:21:03 2015-08-22 04:00:00  1000   250         2
-## 10 2009-07-25 05:14:55 2009-09-25 03:24:00  5000   772        10
+##  1 2016-06-03 23:38:33 2016-07-03 23:38:33 10000   26.0        2
+##  2 2016-08-17 18:04:02 2016-09-16 18:04:02 50000   10.0        1
+##  3 2016-05-21 05:22:07 2016-06-12 06:46:00   300  105          2
+##  4 2011-04-23 11:50:01 2011-05-24 05:00:00  1000 1030         12
+##  5 2011-06-23 22:45:47 2011-07-23 22:45:47  3000  310          6
+##  6 2016-04-09 22:37:17 2016-06-02 01:30:00 12000    2.00       1
+##  7 2016-10-11 17:46:17 2016-11-10 17:46:17 30000  500          7
+##  8 2017-02-01 04:16:17 2017-02-18 22:23:00  3800 7768        114
+##  9 2015-03-19 23:34:57 2015-05-01 01:12:00  2000   25.0        1
+## 10 2015-09-12 02:50:03 2015-10-12 02:50:03  1300 1340         14
 ## # ... with 90 more rows</code></pre>
 <p><br></p>
 </div>
@@ -456,16 +457,16 @@ To avoid errors you do have to also select numeric columns only, which you can d
 <pre><code>## # A tibble: 100 x 2
 ##     goal pledged
 ##    &lt;dbl&gt;   &lt;dbl&gt;
-##  1 10000    27.0
-##  2 30000  2375  
-##  3 10000 12467  
-##  4 15000   600  
-##  5  2000  2496  
-##  6  8000  9355  
-##  7  1501  2742  
-##  8 25000   175  
-##  9  1000   250  
-## 10  5000   772  
+##  1 10000   26.0 
+##  2 50000   10.0 
+##  3   300  105   
+##  4  1000 1030   
+##  5  3000  310   
+##  6 12000    2.00
+##  7 30000  500   
+##  8  3800 7768   
+##  9  2000   25.0 
+## 10  1300 1340   
 ## # ... with 90 more rows</code></pre>
 <p>One of the useful functions for <code>select_if</code> is <code>n_distinct()</code>, which counts the amount of distinct values that can be found in a column.<br />
 To return the columns that have less than 20 distinct answers you pass <code>~n_distinct(.) &lt; 20</code> within the select_if statement. Given that in itself <code>n_distinct(.) &lt; 20</code> is not a function, you will need to put a tilde in front.</p>
@@ -474,16 +475,16 @@ To return the columns that have less than 20 distinct answers you pass <code>~n_
 <pre><code>## # A tibble: 100 x 4
 ##    main_category currency state      country
 ##    &lt;chr&gt;         &lt;chr&gt;    &lt;chr&gt;      &lt;chr&gt;  
-##  1 Games         USD      failed     US     
-##  2 Film &amp; Video  USD      canceled   US     
-##  3 Art           USD      successful US     
-##  4 Crafts        DKK      canceled   DK     
-##  5 Comics        USD      successful US     
-##  6 Publishing    USD      successful US     
-##  7 Games         USD      successful US     
-##  8 Food          USD      failed     US     
-##  9 Film &amp; Video  USD      canceled   US     
-## 10 Crafts        USD      failed     US     
+##  1 Film &amp; Video  USD      failed     US     
+##  2 Games         USD      failed     US     
+##  3 Crafts        CAD      failed     CA     
+##  4 Music         USD      successful US     
+##  5 Film &amp; Video  USD      failed     US     
+##  6 Design        USD      failed     US     
+##  7 Technology    USD      failed     US     
+##  8 Art           USD      successful US     
+##  9 Art           USD      failed     US     
+## 10 Publishing    USD      successful US     
 ## # ... with 90 more rows</code></pre>
 <p><br></p>
 <hr />
@@ -499,16 +500,16 @@ kickstarter_sample %&gt;%
 <pre><code>## # A tibble: 100 x 4
 ##    name                                    pledged  goal delta_pledged_go~
 ##    &lt;chr&gt;                                     &lt;dbl&gt; &lt;dbl&gt;             &lt;dbl&gt;
-##  1 Grimm: A Theatrical Tale                   27.0 10000            - 9973
-##  2 PRELUDE (Canceled)                       2375   30000            -27625
-##  3 &quot;\&quot;1008\&quot; A visual contemplative journ~ 12467   10000              2467
-##  4 boxity - decorative storage resembling~   600   15000            -14400
-##  5 NAZ, A Historical Horror Comic           2496    2000               496
-##  6 INSURANCE EDITIONS: Acme Rubbers &amp; The~  9355    8000              1355
-##  7 Minecraft Photo Book                     2742    1501              1241
-##  8 Craib-Bay                                 175   25000            -24825
-##  9 Hamlet: Blood and Steel -- A Franchise~   250    1000            -  750
-## 10 Rotten Apple Fight!                       772    5000            - 4228
+##  1 Team S.M.I.L.E.                           26.0  10000          - 9974  
+##  2 Insect Wars                               10.0  50000          -49990  
+##  3 Tom Baker Fan d Painted Shirts , by WH~  105      300          -  195  
+##  4 Be a part of funding Heroes new album!  1030     1000              30.0
+##  5 Redemption for an Assassin               310     3000          - 2690  
+##  6 Fitted biodegradable toilet seat cover~    2.00 12000          -11998  
+##  7 Solar Driven Ground Cooling For Permaf~  500    30000          -29500  
+##  8 Giants &amp; Pilgrims: Bellwether           7768     3800            3968  
+##  9 Remix                                     25.0   2000          - 1975  
+## 10 The R Word (take 2)                     1340     1300              40.0
 ## # ... with 90 more rows</code></pre>
 <p>The new column can be made with functions such as average, median, max, min, …</p>
 <pre class="r"><code>kickstarter_sample %&gt;%
@@ -518,16 +519,16 @@ kickstarter_sample %&gt;%
 <pre><code>## # A tibble: 100 x 4
 ##    pledged  goal pledge_delta_vs_average goal_delta_vs_max
 ##      &lt;dbl&gt; &lt;dbl&gt;                   &lt;dbl&gt;             &lt;dbl&gt;
-##  1    27.0 10000                   -9778           -240000
-##  2  2375   30000                   -7430           -220000
-##  3 12467   10000                    2662           -240000
-##  4   600   15000                   -9205           -235000
-##  5  2496    2000                   -7309           -248000
-##  6  9355    8000                   - 450           -242000
-##  7  2742    1501                   -7063           -248499
-##  8   175   25000                   -9630           -225000
-##  9   250    1000                   -9555           -249000
-## 10   772    5000                   -9033           -245000
+##  1   26.0  10000                   -7473           -240000
+##  2   10.0  50000                   -7489           -200000
+##  3  105      300                   -7394           -249700
+##  4 1030     1000                   -6469           -249000
+##  5  310     3000                   -7189           -247000
+##  6    2.00 12000                   -7497           -238000
+##  7  500    30000                   -6999           -220000
+##  8 7768     3800                     269           -246200
+##  9   25.0   2000                   -7474           -248000
+## 10 1340     1300                   -6159           -248700
 ## # ... with 90 more rows</code></pre>
 <p>You can also mutate string columns with stringr’s <code>str_extract()</code> function in combation with any character or regex patterns.</p>
 <pre class="r"><code>#adding new column which has only the first word of the project name
@@ -535,18 +536,18 @@ kickstarter_sample %&gt;%
   mutate(name_first_word = str_extract(name, pattern = &quot;^\\w+&quot;)) %&gt;%
   select(name, name_first_word)</code></pre>
 <pre><code>## # A tibble: 100 x 2
-##    name                                                    name_first_word
-##    &lt;chr&gt;                                                   &lt;chr&gt;          
-##  1 Grimm: A Theatrical Tale                                Grimm          
-##  2 PRELUDE (Canceled)                                      PRELUDE        
-##  3 &quot;\&quot;1008\&quot; A visual contemplative journey&quot;               &lt;NA&gt;           
-##  4 boxity - decorative storage resembling city buildings   boxity         
-##  5 NAZ, A Historical Horror Comic                          NAZ            
-##  6 INSURANCE EDITIONS: Acme Rubbers &amp; The Triumph of Life  INSURANCE      
-##  7 Minecraft Photo Book                                    Minecraft      
-##  8 Craib-Bay                                               Craib          
-##  9 Hamlet: Blood and Steel -- A Franchise Reboot'd (Cance~ Hamlet         
-## 10 Rotten Apple Fight!                                     Rotten         
+##    name                                                   name_first_word
+##    &lt;chr&gt;                                                  &lt;chr&gt;          
+##  1 Team S.M.I.L.E.                                        Team           
+##  2 Insect Wars                                            Insect         
+##  3 Tom Baker Fan d Painted Shirts , by WHOSmakingWHAT !   Tom            
+##  4 Be a part of funding Heroes new album!                 Be             
+##  5 Redemption for an Assassin                             Redemption     
+##  6 Fitted biodegradable toilet seat cover for public use  Fitted         
+##  7 Solar Driven Ground Cooling For Permafrost Foundations Solar          
+##  8 Giants &amp; Pilgrims: Bellwether                          Giants         
+##  9 Remix                                                  Remix          
+## 10 The R Word (take 2)                                    The            
 ## # ... with 90 more rows</code></pre>
 <p><br></p>
 </div>
@@ -558,36 +559,36 @@ kickstarter_sample %&gt;%
   unite(goal_currency, currency, goal, sep=&quot; &quot;) %&gt;%
   select(name, goal_currency))</code></pre>
 <pre><code>## # A tibble: 100 x 2
-##    name                                                      goal_currency
-##  * &lt;chr&gt;                                                     &lt;chr&gt;        
-##  1 Grimm: A Theatrical Tale                                  USD 10000    
-##  2 PRELUDE (Canceled)                                        USD 30000    
-##  3 &quot;\&quot;1008\&quot; A visual contemplative journey&quot;                 USD 10000    
-##  4 boxity - decorative storage resembling city buildings     DKK 15000    
-##  5 NAZ, A Historical Horror Comic                            USD 2000     
-##  6 INSURANCE EDITIONS: Acme Rubbers &amp; The Triumph of Life    USD 8000     
-##  7 Minecraft Photo Book                                      USD 1501     
-##  8 Craib-Bay                                                 USD 25000    
-##  9 Hamlet: Blood and Steel -- A Franchise Reboot'd (Cancele~ USD 1000     
-## 10 Rotten Apple Fight!                                       USD 5000     
+##    name                                                   goal_currency
+##  * &lt;chr&gt;                                                  &lt;chr&gt;        
+##  1 Team S.M.I.L.E.                                        USD 10000    
+##  2 Insect Wars                                            USD 50000    
+##  3 Tom Baker Fan d Painted Shirts , by WHOSmakingWHAT !   CAD 300      
+##  4 Be a part of funding Heroes new album!                 USD 1000     
+##  5 Redemption for an Assassin                             USD 3000     
+##  6 Fitted biodegradable toilet seat cover for public use  USD 12000    
+##  7 Solar Driven Ground Cooling For Permafrost Foundations USD 30000    
+##  8 Giants &amp; Pilgrims: Bellwether                          USD 3800     
+##  9 Remix                                                  USD 2000     
+## 10 The R Word (take 2)                                    USD 1300     
 ## # ... with 90 more rows</code></pre>
 <p>You can unmerge any columns by using tidyr’s <code>separate())</code> function. To do this, you have to specify the column to be splitted, followed by the new column names, and which seperator it has to look for.</p>
 <pre class="r"><code>#splitting the previous made column
 ks_merge %&gt;%
   separate(goal_currency, into = c(&quot;goal&quot;, &quot;currency&quot;), sep=&quot; &quot;)</code></pre>
 <pre><code>## # A tibble: 100 x 3
-##    name                                                     goal  currency
-##  * &lt;chr&gt;                                                    &lt;chr&gt; &lt;chr&gt;   
-##  1 Grimm: A Theatrical Tale                                 USD   10000   
-##  2 PRELUDE (Canceled)                                       USD   30000   
-##  3 &quot;\&quot;1008\&quot; A visual contemplative journey&quot;                USD   10000   
-##  4 boxity - decorative storage resembling city buildings    DKK   15000   
-##  5 NAZ, A Historical Horror Comic                           USD   2000    
-##  6 INSURANCE EDITIONS: Acme Rubbers &amp; The Triumph of Life   USD   8000    
-##  7 Minecraft Photo Book                                     USD   1501    
-##  8 Craib-Bay                                                USD   25000   
-##  9 Hamlet: Blood and Steel -- A Franchise Reboot'd (Cancel~ USD   1000    
-## 10 Rotten Apple Fight!                                      USD   5000    
+##    name                                                   goal  currency
+##  * &lt;chr&gt;                                                  &lt;chr&gt; &lt;chr&gt;   
+##  1 Team S.M.I.L.E.                                        USD   10000   
+##  2 Insect Wars                                            USD   50000   
+##  3 Tom Baker Fan d Painted Shirts , by WHOSmakingWHAT !   CAD   300     
+##  4 Be a part of funding Heroes new album!                 USD   1000    
+##  5 Redemption for an Assassin                             USD   3000    
+##  6 Fitted biodegradable toilet seat cover for public use  USD   12000   
+##  7 Solar Driven Ground Cooling For Permafrost Foundations USD   30000   
+##  8 Giants &amp; Pilgrims: Bellwether                          USD   3800    
+##  9 Remix                                                  USD   2000    
+## 10 The R Word (take 2)                                    USD   1300    
 ## # ... with 90 more rows</code></pre>
 <p><br></p>
 </div>
