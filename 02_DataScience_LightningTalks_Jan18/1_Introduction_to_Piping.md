@@ -19,7 +19,7 @@ options:
     pizza <- take_out(put_in(dress_with(dress_with
             (dress_with(pie, sauce), oil), cheese), oven), oven)
 
-1.  You can create temporary objects
+2.  You can create temporary objects
 
 <!-- -->
 
@@ -29,7 +29,7 @@ options:
     pie_tmp <- put_in(pie_tmp, oven)
     pizza <- take_out(pie_tmp, oven)
 
-1.  You can build a pipeline of operators using the pipe-operator:
+3.  You can build a pipeline of operators using the pipe-operator:
 
 <!-- -->
 
