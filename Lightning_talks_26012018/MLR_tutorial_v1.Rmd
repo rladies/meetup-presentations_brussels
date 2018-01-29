@@ -1,0 +1,273 @@
+---
+title: "MLR"
+author: "Eline Vanwalleghem"
+date: "1/25/2018"
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Tutorial can be found : https://mlr-org.github.io/mlr-tutorial/devel/html/index.html
+
+```{r libraries, warning=FALSE, message=FALSE}
+library(mlbench) # to load datasets
+library(mlr) 
+library(data.table) # to use function as.data.table() (nicer visualisation table)
+library(dplyr) 
+
+```
+
+## Sonar Dataset
+
+In this demo we will focus on a binary classification task. Therefore we use the built-in (mlbench) dataset Sonar. For more details about the dataset : https://www.rdocumentation.org/packages/mlbench/versions/2.1-1/topics/Sonar
+
+```{r}
+data(Sonar)
+head(Sonar,2)
+sonar <- Sonar
+```
+
+# Four-step approach
+
+We can distinguish 4 big steps:    
+
+1. Make a Task  (e.g. classification task, regression task)  
+      More info about tasks: https://mlr-org.github.io/mlr-tutorial/devel/html/task/index.html  
+      
+2. Make a Learner (e.g. logistic regression, decision tree)  
+      More info about learners: https://mlr-org.github.io/mlr-tutorial/devel/html/learner/index.html  
+      
+3. Train a Model by using your Task & Learner  
+      More info about train: https://mlr-org.github.io/mlr-tutorial/devel/html/train/index.html  
+  
+4. Apply your Model using 'predict'  
+      More info about predict: https://mlr-org.github.io/mlr-tutorial/devel/html/predict/index.html  
+
+## 1. Make a Task
+
+Choose your type of Task (e.g. classification) and define your target variable (variable you want to predict).
+
+```{r}
+task <- makeClassifTask(data=sonar, target="Class")
+task
+```
+
+### Check Task
+
+There are different operators to access the different elements of a Task.  
+Some can be very useful like getTaskSize() which we will use later on to divide the dataset in a train and test set.  
+More info about useful operators: https://www.rdocumentation.org/packages/mlr/versions/2.10/topics/makeClassifTask
+
+```{r}
+getTaskSize(task)
+summary(getTaskTargets(task))
+```
+
+## 2. Learners
+
+### Make a Learner
+
+Here you can specify which learning method you want to use, set hyperparameters and control for which type of prediction output (e.g. probabilities or class labels).
+
+```{r}
+lrn <- makeLearner("classif.rpart",predict.type="prob")
+```
+
+### Which Learners exist?
+
+You can get a list of suitable learning methods for your Task!
+
+```{r}
+listLearners(task, warn.missing.packages = FALSE)[c("class", "package")]
+#as.data.table(listLearners(task,warn.missing.packages = FALSE)[c("class", "package")])
+
+```
+
+You can also get a description of all possible parameter settings for a Learner and see what are the defaults.
+
+```{r}
+getParamSet("classif.rpart")
+```
+
+
+## 3. Train a Model
+
+### Divide in Train and Test set
+
+Here we divide the dataset in a train and test set (e.g. 70/30). Easy and general to use getTaskSize() to retrieve the number of observations.
+
+```{r}
+set.seed(123456)
+n <- getTaskSize(task)
+n
+train.set <- sample(n, size = n*0.7)
+test.set <- setdiff(1:n, train.set)
+```
+
+### Train Model using Task and Learner
+
+We're gonna fit a model onto our dataset. Therefore we call the train function on our Learner and Task.
+
+```{r}
+model<-train(lrn,task,subset=train.set)
+```
+
+### How does my model look like?
+
+For a summary of your model you can use getLearnerModel().
+
+```{r}
+getLearnerModel(model)
+```
+
+## 4. Apply a Model
+
+Now we can apply our model to our test set with the predict function.
+
+```{r}
+pred <- predict(model, task = task, subset = test.set)
+```
+
+### Model Performance
+
+To evaluate model performance you can pass a list of measures.  
+For an overview of the available measures : https://mlr-org.github.io/mlr-tutorial/devel/html/performance/index.html
+
+```{r}
+performance(pred, measures = list(mmce, acc, auc))
+```
+
+And you can plot some ROC Curves!
+
+```{r}
+df <- generateThreshVsPerfData(pred, measures = list(fpr, tpr, mmce))
+plotROCCurves(df)
+```
+
+## Benchmark
+
+You can easily benchmark the peformance of different learning methods on one or several datasets.  
+In this demo we want to compare the performance of 3 different type of models.
+
+### Compare different learners
+
+You make 3 Learners and wrap it in a list.
+
+```{r}
+learners <- list(
+  makeLearner("classif.rpart", predict.type = "prob"),
+  makeLearner("classif.randomForest", ntree=500, predict.type="prob"),
+  makeLearner("classif.logreg", predict.type="prob")
+)
+```
+
+### Resampling Strategy
+
+An overview of resampling strategies : https://mlr-org.github.io/mlr-tutorial/devel/html/resample/index.html
+
+```{r}
+rdesc <- makeResampleDesc("CV",iters=3)
+```
+
+### Define measurements
+
+You pass a list of all measures you want to benchmark on.
+
+```{r}
+meas <- list(mmce,auc,timetrain)
+
+```
+
+### Apply benchmark
+
+To compare different learners, you use the benchmark function and pass your  
+
+* list of learners  
+* task  
+* resampling strategy  
+* list of measures  
+
+```{r,warning=FALSE, message=FALSE}
+br <-benchmark(learners,task,rdesc, meas)
+```
+
+### Plot Results
+
+These benchmark plots give you a quick overview of the performance of different learners.  
+
+```{r}
+plotBMRBoxplots(br, measure = mmce)
+plotBMRBoxplots(br, measure = auc)
+plotBMRBoxplots(br, measure = timetrain)
+plotBMRSummary(br)
+```
+
+
+You can pass the BenchMark object also directly to plot all ROC curves.
+
+```{r}
+df <- generateThreshVsPerfData(br, measures = list(fpr, tpr, mmce))
+plotROCCurves(df)
+```
+
+## Feature Importance
+
+These plots give you a nice visualisation of the importance and ranking of the features.  
+
+```{r}
+fv <- generateFilterValuesData(task,method=c("information.gain", "chi.squared"))
+plotFilterValues(fv)
+```
+
+
+## Pre-processing
+
+### Generate data for demo 
+
+```{r}
+sonar_e<-sonar %>% select(Class, V1:V4) # keep target and 4 variables for simplicity
+sonar_e$cte<-2 # create a constant variable
+sonar_e$fac<-as.factor(rep(c("One","Two"))) #create a factor variable
+sonar_e$crap<-999 # create a crappy variable
+
+```
+
+### Create a task first
+
+```{r}
+demotask <-  makeClassifTask(data=sonar_e, target="Class")
+head(getTaskData(demotask))
+```
+
+### Drop Feature
+
+```{r}
+demo<-dropFeatures(demotask,"crap")
+head(getTaskData(demo))
+```
+
+### Remove Constant Features
+
+```{r}
+demo2<-removeConstantFeatures(demo)
+```
+
+### Normalize Features
+
+```{r}
+demo3<-normalizeFeatures(demo2)
+head(getTaskData(demo3))
+```
+
+### Create Dummy Features
+
+```{r}
+demo4<-createDummyFeatures(demo3)
+head(getTaskData(demo4))
+```
+
