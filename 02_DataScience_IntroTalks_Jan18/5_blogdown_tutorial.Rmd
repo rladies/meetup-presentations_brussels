@@ -1,0 +1,151 @@
+---
+title: "R blogdown"
+subtitle: " ✅<br/> making your own website"
+author: "Paula Andrea Martinez"
+date: "2018/01/25"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+```
+
+background-image: url(https://happymoneysaver.com/wp-content/uploads/2013/08/wafflesrecipe2.jpg)
+background-size: 500px
+
+???
+
+Image credit: [happymoneysaver](https://happymoneysaver.com)
+
+---
+class: inverse, center, middle
+
+# Get Started
+
+---
+
+# Step by Step
+
+- I found a recipe
+
+  https://bookdown.org/yihui/blogdown/ 
+
+
+
+- I had the minimum ingredients:
+
+--
+
+  - An idea
+  
+---
+
+background-image: url(https://bookdown.org/yihui/blogdown/images/logo.png)
+background-size: contain
+class: center, bottom, inverse
+
+???
+
+Image credit: [R blogdown](https://github.com/rstudio/blogdown/blob/6e4485e6e233f820396285bac32d6c519b80381c/README.md)
+
+---
+
+# The recipe: R blogdown
+
+Its chapters:
+
+1. aims at getting you started with a new website from scratch
+
+1. helps you customise your website
+
+1. guides you on how to publish a website
+
+.footnote[
+Basically **R blogdown** authors, [Yihui Xie](https://yihui.name), [Amber Thomas](https://amber.rbind.io) and [Alison Presmanes Hill](https://alison.rbind.io), wrote the most flawless recipe I have ever followed. 
+I am super thankful.
+]
+---
+
+# Setting up the workbench
+
+```{r eval=FALSE}
+ install.packages("blogdown")
+``` 
+
+- brew install hugo[1]
+
+.footnote[
+[1] [Hugo](https://gohugo.io/getting-started/quick-start/) is an open-source static site generator
+] 
+---
+
+# A quick example
+
+2 min website! 
+
+
+- Create a new project under a new directory in the RStudio[1]
+  - File > New Project
+  - Then create a website using blogdown[2]
+  
+```{r eval=FALSE}
+blogdown::new_site()
+```
+
+.footnote[
+[1] I have used [RStudio](https://www.rstudio.com/products/rstudio/), but you do not have to
+
+[2] [A-quick-example-tutorial](https://bookdown.org/yihui/blogdown/a-quick-example.html)
+]
+
+---
+
+background-image: url(https://www.mysticallifepublications.org/wp-content/uploads/2014/06/shutterstock_1382845491.jpg)
+background-size: cover
+class: center, bottom, inverse
+
+# I was so happy to have discovered R blogdown!
+---
+
+# Personalise your website
+
+- It is important to be familiar with **R markdown**[1][2] before you can play with the **new website**.
+
+.footnote[
+[1] [R markdown](https://bookdown.org/yihui/blogdown/r-markdown.html)
+
+[2] [10 min Rmarkdown tutorial](https://www.markdowntutorial.com/)
+]
+
+---
+class: center, middle
+
+# Cool resources
+
+- HUGO themes https://themes.gohugo.io/ (Framework / Templates)
+
+- https://www.netlify.com/ to publish your website (+ for having a github)
+
+---
+class: center, middle
+
+# Hold on. This is going to be awesome.
+https://rbind.org/
+
+---
+
+class: center, middle
+
+# Thanks!
+
+Slides created via the R package [**xaringan**](https://github.com/yihui/xaringan).
+
+This is my **website** https://paulaandrea.rbind.io/
+
+Thanks to [**Yihui**](http://yihui.name), [**Nan**](https://github.com/road2stat) and [rbind support](https://github.com/rbind/support).
