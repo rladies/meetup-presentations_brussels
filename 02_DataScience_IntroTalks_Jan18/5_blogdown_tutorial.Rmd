@@ -106,8 +106,6 @@ blogdown::new_site()
 
 ---
 
-background-image: url(https://www.mysticallifepublications.org/wp-content/uploads/2014/06/shutterstock_1382845491.jpg)
-background-size: cover
 class: center, bottom, inverse
 
 # I was so happy to have discovered R blogdown!
