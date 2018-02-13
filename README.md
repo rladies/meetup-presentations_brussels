@@ -8,4 +8,4 @@ R-Ladies Brussels meetup presentations
 
 2. Data science - Introduction Talks  
 [Materials for the shiny introduction workshop](https://github.com/rladies/meetup-presentations_brussels/tree/master/02_DataScience_IntroTalks_Jan18)  
-Including an introduction piping, tidytext, the MLR package for machine learning and blogdown.
+Including an introduction piping, tidytext, the MLR package for machine learning and blogdown; and a case study on using open data for road safety.
