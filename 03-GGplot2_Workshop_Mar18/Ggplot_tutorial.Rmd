@@ -1,0 +1,774 @@
+---
+title: "Ggplot2"
+author: "RLadies Brussels"
+output: md_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Basics
+
+```{r libraries, warning=FALSE, message=FALSE, echo = FALSE}
+library(dplyr) # data wrangling
+library(ggplot2) 
+library(ggthemes) 
+library(tidyr) # data wrangling
+library(stringr) # data wrangling
+library(reshape2) # data wrangling
+library(ggrepel)
+library(nycflights13) #data
+library(patchwork) # multiple plots
+```
+
+```{r, warning=FALSE, message=FALSE}
+library(dplyr)
+library(ggplot2)
+library(ggthemes)
+```
+
+The ggplot2 package (Wickham and Chang 2016) is based on “The Grammar of Graphics” (Wilkinson 2005). This theoretical framework helps us to construct statistical graphics by specifying several components. See
+https://bookdown.org/fjmcgrade/ismaykim/3-viz.html
+
+```{r}
+data(iris)
+glimpse(iris)
+
+ggplot(data=iris, aes(x = Sepal.Length, y = Sepal.Width)) + 
+  geom_point(aes(color=Species)) +
+  xlab("Sepal Length") +  
+  ylab("Sepal Width") +
+  ggtitle("Sepal Length-Width")
+```
+
+Let’s view this plot through the grammar of graphics:
+
+1. The **data** variable Sepal Length gets mapped to the *x-position* aesthetic of the points.
+2. The **data** variable Sepal Width gets mapped to the *y-position* aesthetic of the points.
+3. The **data** variable Species gets mapped to the *color* aesthetic of the points.
+
+The data variables correspond to columns in the iris data frame.  
+Note that data has to be in data frame format!  
+The geometric object considered here is of type point, but there are other types like lines, bars...
+
+Data variable  | Aes        | Geom   
+-------------- | ---------  | ---------  
+Sepal Length   | x          | point
+Sepal Width    | y          | point
+Species        | color      | point  
+
+## How to construct a plot?
+
+1. Specify your data
+
+```{r}
+ggplot(data=iris)
+```
+
+2. Specify mapping of variables to aesthetic components
+
+```{r}
+ggplot(data=iris, mapping= aes(x=Sepal.Length, y= Sepal.Width))
+```
+
+3. Add layer : specify geometric object type
+
+```{r}
+ggplot(data=iris, aes(x=Sepal.Length, y= Sepal.Width)) +
+  geom_point()
+```
+
+4. Add other layers like title, labels and theme
+
+```{r}
+ggplot(data=iris, aes(x=Sepal.Length, y= Sepal.Width)) +
+  geom_point() +
+  ggtitle("Sepal Length-Width")
+```
+
+## Exercise 1 : warm up
+
+Checks:  
+- Title  
+- Labels  
+- Shape  
+- Color  
+- Transparency  
+
+```{r, echo= FALSE}
+ggplot(data=iris, aes(x=Sepal.Length, y= Sepal.Width)) +
+  geom_point(aes(shape=Species), alpha=0.5, color="red") +
+  xlab("Sepal Length") +
+  ylab("Sepal Width") +
+  ggtitle("Sepal Length-Width")
+```
+
+```{r, include=FALSE}
+ggplot(data=iris, aes(x=Sepal.Length, y= Sepal.Width)) +
+  geom_point(aes(shape=Species), alpha=0.5, color="red") +
+  xlab("Sepal Length") +
+  ylab("Sepal Width") +
+  ggtitle("Sepal Length-Width")
+```
+
+
+**Take away :**  
+1. Note that there is no aes() surrounding alpha = 0.5 and color="red" here. Since we are NOT mapping a variable to an aesthetic but instead are just changing a setting, we don’t need to create a mapping with aes().  
+2. To improve legibility of your code, it's recommended to start a new line whenever adding a layer.    
+3. Note that your have to put the **+ sign** always at the end of your line.  
+
+
+## Update data layers
+
+Create your base plot and save it as a variable.  
+
+```{r}
+p1<- ggplot(data=iris, aes(x = Sepal.Length, y = Sepal.Width)) + 
+  geom_point(aes(color=Species)) +
+  xlab("Sepal Length") +  
+  ylab("Sepal Width") +
+  ggtitle("Sepal Length-Width")
+
+```
+
+Use *%+%* to update your data layer.  
+
+```{r}
+p2 <- p1 %+% aes(shape=Species)
+p2
+```
+
+```{r}
+p2 %+%
+  aes(y=Petal.Length) %+% 
+  ggtitle(" ")
+
+```
+
+Add a data layer.  
+
+```{r}
+p3 <- p2 + geom_smooth(method="lm", se=F)
+p3
+```
+
+```{r}
+p4 <- p3 + facet_wrap(~Species)
+p4
+```
+
+It's useful to also save commonly used data layers and combine them easily.  
+
+```{r}
+fw <- facet_wrap(~Species)
+p1 + fw
+p2 + fw
+```
+
+## Facets
+
+```{r}
+library(nycflights13)
+mia_flights <- flights %>% 
+  filter(dest == "MIA", !is.na(arr_delay))
+```
+
+```{r, echo = FALSE, warning=FALSE }
+h1<- ggplot(data=mia_flights,aes(x=air_time)) +
+  geom_histogram()  
+h2 <- h1 +  facet_wrap(~origin)
+fw<- facet_wrap(~origin,scales='free_x')
+h3<- h1 + fw
+h4<-h3  %+% aes(fill=origin)
+h4 + facet_grid(carrier~origin,scales='free_x')
+h4 + facet_wrap(carrier~origin, scales='free_x')
+```
+
+We start with a basic histogram.  
+
+```{r}
+h1<- ggplot(data=mia_flights,aes(x=air_time)) +
+       geom_histogram()  
+h1
+```
+
+We split it into groups.  
+
+```{r}
+h1 +  facet_wrap(~origin)
+```
+
+You can play with the scale.  
+
+```{r}
+fw<- facet_wrap(~origin,scales='free_x')
+h3<- h1 + fw
+h3
+```
+
+Update a layer.  
+And play with facet_wrap & facet_grid.  
+
+```{r}
+h4<-h3  %+% aes(fill=origin)
+h4
+h4 + facet_grid(carrier~origin,scales='free_x')
+h4 + facet_wrap(carrier~origin, scales='free_x')
+```
+
+
+Take away :  
+1. What is the difference between facet_grid & facet_wrap?  
+
+*Facet_grid(x~y)* will show all **x*y plots** even if a plot is empty.  
+*Facet_wrap(x~y)* only shows plots having actual values.  
+
+2. Scales can be made independent, by setting them *'free'*.  
+
+# Exercise 2: How does air_time evolves?
+
+```{r, echo=FALSE}
+bp <- ggplot(data=mia_flights, aes(as.factor(month), air_time, fill = origin)) +
+  geom_boxplot()
+bp + facet_wrap(~origin,scales='free_y') + xlab("Month")
+```
+
+# Highlight the chick!
+
+We can plot the evolution of the weight of chicks over time.  
+
+```{r}
+data(ChickWeight)
+ggplot() +
+  geom_line(data=ChickWeight, aes(x=Time, y=weight, group=Chick), color = "gray") 
+```
+
+But tell me, how does the weight of Chick 17 evolve?  
+
+```{r}
+ggplot() +
+  geom_line(data=ChickWeight, aes(x=Time, y=weight, group=Chick), color = "gray") +
+  geom_line(data=subset(ChickWeight, Chick==17),
+            aes(x=Time, y=weight, group=Chick), color = "red", size = 1) +
+  labs(title = "Weight of Chicks 17 versus other chicks")
+
+```
+
+Select multiple chicks upfront to highlight them.  
+
+```{r}
+selected_chicks <- ChickWeight %>%
+  filter(Chick %in% c(15, 16, 17))
+
+ggplot(data=ChickWeight, aes(x=Time, y=weight, group=Chick)) +
+  geom_line(color = "gray") +
+  geom_line(data=selected_chicks, aes(color = Chick), size = 1) +
+  labs(title = "Weight of Chicks 15, 16, 17 versus other chicks")
+```
+
+# Themes
+
+## Let's create the ugliest plot you've ever seen
+
+In the theme layer you specify all visual elements that are not part of the data like text, lines and rectangels.  
+
+Let's go back to our original ChickWeight plot
+
+```{r}
+cw<-ggplot() +
+  geom_line(data=ChickWeight, aes(x=Time, y=weight, group=Chick), color = "gray") 
+
+cw
+```
+
+And let's change the background color to green.  
+
+```{r}
+cw + theme(plot.background=element_rect(fill="green"))
+```
+
+Add a thick red border.  
+
+```{r}
+cw + theme(plot.background=element_rect(fill="green", color="red", size=5))
+```
+
+Let's get rid of the grey panel background.  
+
+```{r}
+cw + theme(plot.background=element_rect(fill="green", color="red", size=5),
+           panel.background=element_blank())
+
+```
+
+You will love element_blank()! Do you really need those gridlines?  
+
+```{r}
+cw + theme(plot.background=element_rect(fill="green", color="red", size=5),
+           panel.background=element_blank(),
+           panel.grid = element_blank())
+```
+
+Let's make this plot even more ugly by adding blue lines and yellow ticks.  
+
+```{r}
+cw + theme(plot.background=element_rect(fill="green", color="red", size=5),
+           panel.background=element_blank(),
+           panel.grid = element_blank(),
+           axis.line=element_line(color="blue"),
+           axis.ticks=element_line(color="yellow"))
+```
+
+To finish, we should definitely pimp the x axis label!  
+
+```{r}
+cw + theme(plot.background=element_rect(fill="green", color="red", size=5),
+           panel.background=element_blank(),
+           panel.grid = element_blank(),
+           axis.line=element_line(color="blue"),
+           axis.ticks=element_line(color="yellow"),
+           axis.title.x=element_text(color="darkblue",hjust=0,face="italic"))
+```
+
+We should definitely save our theme, because we want to apply it to all our plots!  
+
+```{r}
+ugly_theme <- theme(plot.background=element_rect(fill="green", color="red", size=5),
+                    panel.background=element_blank(),
+                    panel.grid = element_blank(),
+                    axis.line=element_line(color="blue"),
+                    axis.ticks=element_line(color="yellow"),
+                    axis.title.x=element_text(color="darkblue",hjust=0,face="italic"))
+```
+
+Remember our 'iris plot'?  
+
+```{r}
+iris_plot <- ggplot(data=iris, aes(x=Sepal.Length, y= Sepal.Width)) +
+  geom_point(aes(shape=Species), alpha=0.5, color="red") +
+  xlab("Sepal Length") +
+  ylab("Sepal Width") +
+  ggtitle("Sepal Length-Width")
+
+iris_plot
+iris_plot + ugly_theme
+```
+
+If you want to change some other things not included in your theme, you can just add another theme_layer.  
+
+```{r}
+iris_plot + ugly_theme + theme(legend.background = element_blank(),
+                               legend.key  = element_blank())
+```
+
+
+
+## Exercise 3
+
+Use the theme_layer to convert our original iris_plot to the following one.
+
+```{r, echo=FALSE}
+iris_plot + theme_tufte()
+```
+
+
+## Ggthemes
+
+http://www.ggplot2-exts.org/ggthemes.html  
+https://github.com/jrnold/ggthemes   
+
+```{r}
+iris_plot + theme_bw()
+```
+
+Note that you can just add your own theme preferences upon an existing theme.  
+Here we use theme_bw(), but we want to remove the ticks.  
+
+```{r}
+iris_plot + theme_bw() + theme(axis.ticks=element_blank())
+```
+
+To know what's in a theme.  
+
+```{r}
+theme_bw
+```
+
+Did you know that there's also an RLadies theme?  
+You can find it on Github
+
+https://github.com/rladies/starter-kit/blob/master/rladiesggplot2theme.R  
+
+
+```{r, message=FALSE, echo=FALSE}
+
+r_ladies_theme <- function(){
+  theme_bw() %+replace% 
+    theme(text = element_text(family = "HelveticaNeue", face = "plain",
+                              colour = 'black', size = 10,
+                              hjust = .5, vjust = .5, angle = 0, 
+                              lineheight = 1.1, 
+                              margin = margin(t = 0, r = 0, b = 0, l = 0, 
+                                              unit = "pt"), 
+                              debug= FALSE), 
+          axis.text = element_text(colour = "#181818"), 
+          axis.title = element_text(face = "bold", colour = "#88398A", size = rel(1.1)), 
+          plot.title = element_text(face = "bold", size = rel(1.4), 
+                                    colour = "#88398A", 
+                                    margin = margin(t = 0, r = 0, b = 6.6,
+                                                    l = 0, unit = "pt")),
+          legend.title = element_text(face = "bold", colour = "#181818"),
+          panel.grid.major = element_line(color = "#D3D3D3"))
+}
+
+```
+
+Let's make our 'iris plot' RLadies-style!  
+
+```{r}
+iris_plot + r_ladies_theme()
+```
+
+
+# Zoom on Barplots (by Huong)
+
+```{r, echo= FALSE, warning=FALSE, message=FALSE}
+library(dplyr) # data wrangling
+library(ggplot2) 
+library(ggthemes) 
+library(tidyr) # data wrangling
+library(stringr) # data wrangling
+library(reshape2) # data wrangling
+library(ggrepel)
+library(nycflights13) #data
+library(patchwork) # multiple plots
+X<-c(1:5)
+BOROUGH <- c('BRONX','BROOKLYN','MANHATTAN','QUEENS','STATEN ISLAND')
+total.injured<-c(15.190865,36.058970,17.365044,26.888947,4.496175)
+total.killed <- c(13.932584 ,33.258427,18.764045,28.314607,5.730337)
+total.pedes.injured <- c(15.46801,33.94424,25.16183,22.59442,2.83150)
+total.pedes.killed <- c(13.446970,32.196970,24.053030,26.515152,3.787879)
+total.cyc.injured <- c(8.981414,40.026996,30.178590,19.722770,1.090229)
+total.cyc.killed <- c(12.000000,36.000000,25.333333,24.000000,2.666667)
+total.motor.injured <- c(15.962963,36.256296,12.644444,29.517778,5.618519)
+total.motor.killed <- c(13.932584,33.258427,18.764045,28.314607,5.730337)
+
+pct.crash.table<-data.frame(X,BOROUGH,total.injured,total.killed,total.pedes.injured,
+                     total.pedes.killed,total.cyc.injured,total.cyc.killed,
+                     total.motor.injured,total.motor.killed)
+
+```
+
+
+The default barplot lay-out is verticle.  
+
+```{r}
+ggplot(pct.crash.table, aes(x = BOROUGH, y = total.injured)) +
+  # make bar graphs; default is verticle
+  geom_bar(stat = "identity")
+```
+
+You can change it to horizontal by using coord_flip().  
+
+
+```{r}
+ggplot(pct.crash.table, aes(x = BOROUGH, y = total.injured)) +
+  # change the colors of bars
+  geom_bar(stat = "identity", colour = "orange") +
+  # horizontal bars
+  coord_flip()
+```
+
+You can set colour: it will set the outline colour of your bars.  
+You can set fill : it will set the colour of your bars.  
+
+```{r}
+ggplot(pct.crash.table, aes(x = BOROUGH, y = total.injured)) +
+  # change the colors of bars
+  geom_bar(stat = "identity", colour = "orange", fill="orange") +
+  # horizontal bars
+  coord_flip()
+```
+
+You can reorder your data in the data layer.  
+And change the labels of x and y axis.  
+
+```{r}
+ggplot(pct.crash.table, aes(x = reorder(BOROUGH, total.injured), y = total.injured)) +
+  geom_bar(stat = "identity", colour = "orange", fill ="orange") +
+  coord_flip() +
+  labs(x = "borough",
+       y = "total injured (%)")
+```
+
+
+```{r, echo=FALSE}
+# intermediate graph
+modes.injured = data.frame(borough = pct.crash.table$BOROUGH,
+                           motorists = pct.crash.table$total.motor.injured,
+                           pedestrians = pct.crash.table$total.pedes.injured,
+                           cyclists = pct.crash.table$total.cyc.injured)
+
+
+# melt variables
+modes.injured2 = melt(modes.injured, id.vars = "borough", measure.vars = c("motorists", "pedestrians", "cyclists"))
+
+# plotting side by side
+modes.colors = c("motorists" = "sienna",
+                 "pedestrians" = "sienna1",
+                 "cyclists" = "sienna3")
+
+# make copies
+modes.injured2$borough1 = modes.injured2$borough
+modes.injured2$variable2 = modes.injured2$variable
+modes.injured2$variable3 = modes.injured2$variable
+modes.injured2$variable4 = modes.injured2$variable
+modes.injured2$variable5 = modes.injured2$variable
+
+# ordering of values by results of motorists 
+modes.injured2$value2 = rep(modes.injured2$value[modes.injured2$variable2 == "motorists"], 3)
+```
+
+## How do we create following plot? 
+
+From this plot  
+
+```{r, echo=FALSE}
+ggplot(modes.injured2, aes(x = reorder(borough1, -value2), y = value, fill = variable)) + geom_bar(stat="identity")
+```
+
+To this plot  
+
+```{r, echo=FALSE}
+ggplot(modes.injured2, aes(x = reorder(borough1, -value2), y = value, fill = variable)) +
+  geom_bar(stat = "identity", colour = "gray100", width = .6, position = "dodge") +
+  # change orientation of bars
+  coord_flip() +
+  # label rates and set font size
+  geom_text(aes(label = paste0(round(modes.injured2$value,0), "%")),
+            position = position_dodge(width = 0.5),
+            hjust = - .2, 
+            size = 3) +
+  # fill in colours for groups
+  scale_fill_manual("", values = modes.colors) +
+  ### set scale of y from 0 to 50
+  scale_y_continuous(limits = c(0,50)) +
+  # move legend to the bottom
+  theme(legend.position = "bottom",
+        legend.text = element_text(size = 10)) +
+  # get rid of grey background and add lines for 0,10, 20, 30
+  guides(fill = guide_legend(nrow = 1, byrow = TRUE, reverse = FALSE)) +
+  theme(axis.text.x =element_text(size = 7),
+        axis.title.x = element_blank(),
+        axis.line.x = element_blank(),
+        axis.text.y =element_text(size = 12),
+        axis.title.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.line.y = element_blank(),
+        panel.grid.major.x = element_line(colour = "azure3", size = 0.2),
+        panel.background = element_blank(),
+        panel.spacing = unit(4, "lines")) +
+  # putting two graphs side by side
+  facet_grid(. ~ variable5, scales = "fixed", space = "free") +
+  # set  labeling on the left side of the graph
+  theme(strip.background = element_blank(),
+        # put facet label to the left of axis label
+        strip.placement = "outside",
+        strip.text.x = element_text(angle = 0,colour= "black",size = unit(14,'pt')))
+
+```
+
+Let's go step by step!   
+
+Set the data layer.    
+
+```{r}
+m1<- ggplot(modes.injured2, aes(x = reorder(borough1, -value2), y = value, fill = variable))
+m1
+```
+
+Add geom_bar. Note that we set the colour.  
+
+```{r}
+m1 + geom_bar(stat = "identity", colour = "gray100")
+```
+
+We want to change the width.  
+
+```{r}
+m1 + geom_bar(stat = "identity", colour = "gray100", width = .6)
+```
+
+And change the position.  
+
+```{r}
+m2 <- m1 + geom_bar(stat = "identity", colour = "gray100", width = .6, position = "dodge")
+m2
+```
+
+Let's flip the axes.  
+
+```{r}
+m3 <- m2 + coord_flip()
+m3
+```
+
+Let's add some data labels!  
+
+```{r}
+m4 <- m3 +  geom_text(aes(label = paste0(round(modes.injured2$value,0), "%")),
+                      position = position_dodge(width = 0.5),
+                      hjust = - .2, 
+                      size = 3)
+m4
+```
+
+Let's manually define the colors.  
+
+```{r}
+modes.colors = c("motorists" = "sienna",
+                 "pedestrians" = "sienna1",
+                 "cyclists" = "sienna3")
+
+m5 <- m4 + scale_fill_manual("", values = modes.colors)
+m5
+```
+
+Enlarge the y-axis manually from 0 to 50.  
+
+```{r}
+m6 <- m5 + scale_y_continuous(limits = c(0,50)) 
+m6
+```
+
+Move the legend to the bottom.  
+
+```{r}
+m7 <- m6 + 
+  theme(legend.position = "bottom",
+        legend.text = element_text(size = 10))
+m7
+```
+
+Get rid of the grey background and add lines for 0, 10, 20..  
+
+```{r}
+m8 <- m7 +
+  guides(fill = guide_legend(nrow = 1, byrow = TRUE, reverse = FALSE)) +
+  theme(axis.text.x =element_text(size = 7),
+        axis.title.x = element_blank(),
+        axis.line.x = element_blank(),
+        axis.text.y =element_text(size = 12),
+        axis.title.y = element_blank(),
+        axis.ticks.y = element_blank(),
+        axis.line.y = element_blank(),
+        panel.grid.major.x = element_line(colour = "azure3", size = 0.2),
+        panel.background = element_blank(),
+        panel.spacing = unit(4, "lines"))
+m8
+```
+
+Putting graphs side by side.  
+
+```{r}
+m9<- m8 + facet_grid(. ~ variable5, scales = "fixed", space = "free")
+m9
+```
+
+Change facet label.  
+
+```{r}
+m10 <- m9 + theme(strip.background = element_blank(),
+                  # put facet label to the left of axis label
+                  strip.placement = "outside",
+                  strip.text.x = element_text(angle = 0,colour= "black",size = unit(14,'pt')))
+m10
+```
+
+# Extra
+
+## Heatmap
+
+```{r,echo=FALSE}
+
+flights_mia <-
+  nycflights13::flights %>% 
+  filter(origin == "JFK") %>% 
+  mutate(hh = round(sched_dep_time / 100, 0) - 1) %>% 
+  mutate(yyyymmdd = lubridate::ymd(sprintf("%04.0f-%02.0f-%02.0f", year, month, day))) %>% 
+  mutate(wd = lubridate::wday(yyyymmdd, label = TRUE))
+
+me<- flights_mia %>% group_by(wd,hour) %>% summarise(avg_dist=mean(arr_delay,na.rm=T))
+```
+
+```{r}
+ggplot(data=me,aes(x=hour,y=wd)) + 
+  geom_tile(aes(fill=avg_dist)) + 
+  scale_fill_gradientn(colors=c( "darkblue", "orange","yellow"), name="minutes") + 
+  labs(title="Average delay in arrival when flying from JFK airport in 2013",
+       subtitle="By hour and weekday",
+       caption = "When would you book your flight?") +
+  theme(
+    panel.background=element_blank(), 
+    axis.ticks=element_blank(),
+    axis.title=element_blank()
+  )
+```
+
+## Extensions
+
+There are some great ggplot extensions
+http://www.ggplot2-exts.org/gallery/  
+
+## Add labels to your points with ggrepel
+
+```{r}
+ggplot(data=mia_flights, aes(x=dep_delay, y= arr_delay, color=carrier)) +
+  geom_point() +
+  geom_text(data=filter(mia_flights, dep_delay>500), aes(label=origin))
+```
+
+You can avoid overlapping by using the ggrepel package.  
+
+```{r}
+library(ggrepel)
+ggplot(data=mia_flights, aes(x=dep_delay, y= arr_delay, color=carrier)) +
+  geom_point() +
+  geom_text_repel(data=filter(mia_flights, dep_delay>500), aes(label=origin))
+```
+
+
+## GGally
+
+How is my data distributed?
+
+```{r, warning=FALSE, message=FALSE}
+library(GGally)
+ggpairs(iris)
+```
+
+
+## Patchwork
+
+Combine plots how you want!  
+https://github.com/thomasp85/patchwork  
+
+```{r}
+library(patchwork)
+p1<-ggplot(data=iris, aes(x = Sepal.Length, y = Sepal.Width)) + 
+  geom_point(aes(color=Species)) +
+  xlab("Sepal Length") +  
+  ylab("Sepal Width") +
+  ggtitle("Sepal Length-Width")
+p2 <- p1 %+% aes(shape=Species) + geom_smooth(method="lm", se=F)
+p1 + p2
+```
+
+
+## Colors
+
+Do you need some ideas for great matching colors?  
+https://colorbrewer2.org  
+
+
