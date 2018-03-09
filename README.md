@@ -3,9 +3,13 @@
 # Meet-up Presentations Brussels
 R-Ladies Brussels meetup presentations
 
-1. Shiny workshop  
-[Materials for the shiny introduction workshop](https://github.com/rladies/meetup-presentations_brussels/tree/master/01_Building_Shiny_apps_Dec17)
+### 1. Shiny workshop  
+[Materials for the shiny introduction workshop](01_Building_Shiny_apps_Dec17/)
 
-2. Data science - Introduction Talks  
-[Materials for the shiny introduction workshop](https://github.com/rladies/meetup-presentations_brussels/tree/master/02_DataScience_IntroTalks_Jan18)  
+### 2. Data science - Introduction Talks  
+[Materials for the shiny introduction workshop](02_DataScience_IntroTalks_Jan18/)  
 Including an introduction piping, tidytext, the MLR package for machine learning and blogdown; and a case study on using open data for road safety.
+
+
+### 3. Introduction to ggplot2
+[Workshop material](03-GGplot2_Workshop_Mar18/Ggplot_tutorial.md)
