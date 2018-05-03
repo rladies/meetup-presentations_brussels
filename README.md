@@ -15,4 +15,4 @@ Including an introduction piping, tidytext, the MLR package for machine learning
 [Workshop material](03-GGplot2_Workshop_Mar18/Ggplot_tutorial.md)
 
 ### 4. Introduction to Roxygen2 and Lavaan packages
-[Writing R package documentation with Roxygen2]()
+[Writing R package documentation with Roxygen2](04_Introd_Roxygen2_Lavaan_Apr18/roxygen2-april18.Rmd)
