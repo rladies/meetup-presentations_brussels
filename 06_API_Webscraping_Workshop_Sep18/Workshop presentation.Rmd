@@ -1,0 +1,1017 @@
+---
+title: "Working with web data"
+author: "Suzan Baert"
+date: "2018/09/27"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    css: [default, "css/my-fonts.css"]
+    seal: false
+    nature:
+      ratio: '16:9'
+      highlightStyle: github
+      highlightLines: true
+      slideNumberFormat: ""
+---
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+```
+
+background-image: url(images/cover.png)
+background-size: cover
+
+
+---
+
+background-image: url(images/internet.jpg)
+background-position: 85% 60%
+background-size: 600px
+
+# Getting data from the web
+
+<br>
+
++ Downloading files
++ Getting data from API's
++ Scraping from webpages
+
+---
+
+background-image: url(images/decision_tree.png)
+background-size: 1000px
+
+# Getting data from the web
+
+---
+
+
+# Webscraping Etiquette
+
+<br>
+
+1. If there is a public API available, use the API and don't scrape the info
+
+2. Always check with `robotstxt` or `polite` whether you are allowed to scrape a page
+
+3. Build system sleeps into your API or scraping requests
+
+4. Don't gather data you won't need
+
+5. Keep away from gathering PII (personal identifiable) data
+
+
+---
+
+class: left, middle
+
+background-image: url(images/laptop-background.jpg)
+background-size: cover
+
+# Part 1: API
+
+---
+
+# What is an API?
+
+.center[API = Application Programming Interface  
+"a set of subroutine definitions, communication protocols,  
+and tools for building software"]
+
+--
+
+<br>
+
+.center.handwritten[HUH ???]
+
+--
+
+### Examples:  
+- Travel websites getting info on flight schedule and prices
+- Getting fonts for your website (or these slides) through Google Fonts API 
+- Getting tweets with the hashtag #rstats via Twitter API
+- ...
+
+---
+
+# API communication
+
+Communication with HTTP request methods.  
+Two most common protocols:
+
+--
+
+.pull-left[
+## GET requests
+Asking the API for something
+```{r eval = FALSE}
+library(httr)
+response <- GET(url)
+content(response)
+```
+
+]
+
+--
+
+.pull-right[
+## POST requests
+Giving something to the API
+```{r eval = FALSE}
+library(httr)
+response <- POST(url, body)
+content(response)
+```
+
+]
+
+
+---
+
+# API output
+
++ Two general formats for API responses 
++ Both are plain text formats to exchange data
+
+
+.pull-left[
+**JSON**: Javascript Object Notation
+Most common these days.
+
+```{r eval = FALSE}
+{"employees":[
+    {"firstName":"John", "lastName":"Doe"},
+    {"firstName":"Anna", "lastName":"Smith"},
+    {"firstName":"Peter", "lastName":"Jones"}
+]}
+```
+]
+
+--
+
+.pull-right[
+**XML**: Extensible Markup Language
+
+```{r eval = FALSE}
+<employees>
+    <employee>
+        <firstName>John</firstName> 
+        <lastName>Doe</lastName>
+    </employee>
+    <employee>
+        <firstName>Anna</firstName> 
+        <lastName>Smith</lastName>
+    </employee>
+    <employee>
+        <firstName>Peter</firstName> 
+        <lastName>Jones</lastName>
+    </employee>
+</employees>
+```
+]
+
+---
+
+# A quick intro to JSON
+
+**Two basic forms:**
++ JSON object: `{"key": "value"}`
++ JSON array: `[1, 2, 3]` or `["a", "b", "c"]`
+
+Objects and arrays can be nested to build hierarchies.
+
+--
+
+<br>
+
+**For R users:**
++ JSON object ~ named value
++ JSON array ~ named vector
+
+---
+
+# A quick intro to JSON: making JSON human readable
+
+```{r}
+library(jsonlite)
+json_object <- '{"organization" : "R-Ladies", "chapter": "Brussels", "start_year": 2017, "active": true, "organizers": ["Marlene", "Huong", "Suzan"]}'
+prettify(json_object)
+```
+
+---
+
+# A quick intro to JSON: parsing JSON to R
+
+
+```{r}
+library(jsonlite)
+fromJSON(json_object)
+```
+
+---
+
+background-image: url(images/API_workflow.png)
+background-position: 50% 60%
+background-size: 1000px
+
+
+---
+
+# Easy example: ISS position
+
+![](images/API1_ISS.png)
+
+---
+
+background-image: url(images/API_workflow_icon1.png)
+background-position: 100% 0%
+background-size: 200px
+
+
+# Easy example: ISS position
+
+Step 1: Preparation:
+
+```{r cache=TRUE}
+url <- "http://api.open-notify.org/iss-now.json"
+```
+
+
+---
+
+background-image: url(images/API_workflow_icon2.png)
+background-position: 100% 0%
+background-size: 200px
+
+# Easy example: ISS position
+
+
+Step 2: GET request: Watch the status code!
+```{r cache=TRUE}
+library(httr)
+response_iss <- GET(url)
+response_iss
+```
+
+
+---
+
+background-image: url(images/API_workflow_icon3.png)
+background-position: 100% 0%
+background-size: 200px
+
+# Easy example: ISS position
+
+Step 3: Extract and parse the response
+
+```{r cache = TRUE}
+content_iss <- content(response_iss)
+content_iss
+```
+
+
+---
+
+background-image: url(images/API_workflow_icon3.png)
+background-position: 100% 0%
+background-size: 200px
+
+# Easy example: ISS position
+
+Step 4: Data wrangling in R
+
+```{r cache = TRUE}
+ISS_position <- data.frame(
+  time = content_iss$timestamp,
+  lat = content_iss$iss_position$latitude,
+  long = content_iss$iss_position$longitude)
+
+ISS_position
+
+```
+
+---
+
+background-image: url(images/API_workflow_R.png)
+background-position: 50% 60%
+background-size: 1000px
+
+
+
+---
+
+background-image: url(images/API_workflow_icon1.png)
+background-position: 100% 0%
+background-size: 200px
+
+
+# Prepare your request: URL-building
+
+
+Read the documentation: every API is different
+
++ Directory based URLs: `url/api/directory1/directory2`
+
++ Parameter based URLs: `url/api?param1=value1&param2=value2`
+
++ A combination of both: `url/api/directory1?param1=value`
+
+--
+
+<br>
+
+**Examples:**
+
+Github: `https://api.github.com/repos/vmg/redcarpet/issues?state=closed`
+
+Star Wars API: `https://swapi.co/api/planets`
+
+Game of Thrones API: `https://www.anapioficeandfire.com/api/characters?page=1&pageSize=10`
+
+
+---
+
+background-image: url(images/API_workflow_icon1.png)
+background-position: 100% 0%
+background-size: 200px
+
+
+# Prepare your request: URL-building
+
++ Option 1: Manual copy paste:
+```{r eval=FALSE}
+url <- "http://api.website.com/directory1?param1=value1&param2=value2"
+```
+
+--
+
++ Option 2: Pasting together:
+```{r eval=FALSE}
+url1 <- paste("http://api.website.com", directory1, sep = "/")
+
+url2 <- paste0("http://api.website.com/directory1?param1=", value1,
+              "&param2=", value2)
+```
+
+
+--
++ Option 3: Modifying url
+```{r eval=FALSE}
+
+
+url <- modify_url(url = "http://api.website.com",
+                  path = "directory1",
+                  query = list(param1 = "value1", param2 = "value2"))
+```
+
+              
+---
+
+background-image: url(images/API_workflow_icon1.png)
+background-position: 100% 0%
+background-size: 200px
+
+
+# Prepare your request: Authentication
+
+Different types of authentication exists: 
++ username/password via `authenticate()`
++ OAuth 1.0 via `oauth_app()` and `oauth1.0_token`
++ OAuth 2.0 via `oauth_app()` and `oauth2.0_token`
+
+How to get access? 
++ Follow the documentation
++ Follow demo's: [https://github.com/r-lib/httr/tree/master/demo](https://github.com/r-lib/httr/tree/master/demo)
+
+---
+
+background-image: url(images/API_workflow_icon2.png)
+background-position: 100% 0%
+background-size: 200px
+
+
+# Step 2: GET request
+
+Basic structure:
+
+```{r eval = FALSE}
+library(httr)
+response <- GET(url, 
+                use_agent = "mycontact@email.com",
+                query = query_params,
+                authenticate("username", "password"))
+```
++ URL: base URL or full URL assembled before
++ optional but recommended: add a user-agent to describe who you are and what you're trying to do
++ optional: query with a list of query paramaters if not added to url yet
++ optional: authenticate
+
+
+---
+
+background-image: url(images/API_workflow_icon3.png)
+background-position: 100% 0%
+background-size: 200px
+
+
+# Step 3: Extract and parse the response
+
+```{r eval = FALSE}
+library(httr)
+content <- content(response)
+```
+
+By default, httr::content() automatically parses to R
++ if JSON: using jsonlite::fromJSON()
++ if XML: using xml2::read_xml()
+
+<br>
+
+Alternative options:
++ `content(response, as = "text")`: extracts without parsing
+
+
+---
+
+background-image: url(images/API_workflow_icon4.png)
+background-position: 100% 0%
+background-size: 200px
+
+
+# Step 4: Data wranging in R
+
+Use all your list tools to get your data in the shape you need it:
+- purrr
+- dplyr
+- rlist
+- ...
+
+
+---
+
+# Repeated API calls
+
+<br> 
+
++ Wrap your code in a function
++ Build a Sys.sleep() between iterations!
+
+
+---
+
+class: center, middle
+
+
+# Your turn!
+
+---
+
+# Your turn: Example 1
+
+Get the five next ISS passes above Brussels
+
+#### API Documentation: 
+http://open-notify.org/Open-Notify-API/ISS-Pass-Times/
+
+<br>
+
+
+#### Coordinates brussels
++ lat_bxl <- 50.85045
++ long_bxl <- 4.34878
+
+
+---
+
+# Your turn: solution example 1
+
+```{r}
+lat_bxl <- 50.85045
+long_bxl <- 4.34878
+
+#option 1: manual
+url <- "http://api.open-notify.org/iss-pass.json?lat=50.85045&lon=4.34878"
+
+#option 2: paste together
+url2 <- paste0("http://api.open-notify.org/iss-pass.json?lat=", lat_bxl, "&lon=", long_bxl)
+
+#option 3: build URL
+url3 <- httr::modify_url(url = "http://api.open-notify.org",
+                  path = "iss-pass.json",
+                  query = list(lat = lat_bxl, lon = long_bxl))
+
+```
+
+---
+
+# Your turn: solution example 1
+
+```{r cache = TRUE}
+#GET request
+response <- GET(url3)
+
+#unpack response
+content <- content(response)
+
+#modify to R
+pass_times <- data.frame(
+  risetime = purrr::map_chr(content$response, "risetime"),
+  duration = purrr::map_chr(content$response, "duration"))
+
+pass_times
+```
+
+
+
+---
+
+# Your turn: Example 2
+
+**An API of Ice and Fire**: [www.anapioficeandfire.com](www.anapioficeandfire.com)
+
++ Get the info on all the books
++ Find all book names
++ Extract the POV (point of view characters) from book 1
++ Ask the API for info on all pov characters from book 1
+
+
+
+---
+
+# Your turn: solution example 2
+
+Getting the info on all books
+
+```{r}
+library(httr)
+url <- "https://www.anapioficeandfire.com/api/books"
+response_books <- GET(url)
+content_books <- content(response_books)
+
+#look into the book 
+str(content_books, max.level = 2)
+```
+
+
+---
+
+# Your turn: solution example 2
+
+Find all book names
+
+```{r}
+purrr::map_chr(content_books, "name")
+```
+
+
+---
+
+# Your turn: solution example 2
+
+Extract the POV (point of view characters) from book 1
+
+
+```{r cache = TRUE}
+content_book1 <- content_books[[1]]
+book1_pov <- content_book1$povCharacters
+book1_pov <- unlist(book1_pov)
+book1_pov
+```
+
+
+---
+
+# Your turn: solution example 2
+
+Call the API for info on first character
+
+```{r cache = TRUE}
+url1 <- book1_pov[1]
+response <- GET(url1)
+content <- content(response)
+
+data.frame(name = content$name,
+  gender = content$gender,
+  culture = content$culture,
+  born = content$born,
+  died = content$died)
+```
+
+---
+
+# Your turn: solution example 2
+
+Wrap it inside a function:
+
+```{r}
+get_pov_info <- function(url) {
+  response <- GET(url)
+  content <- content(response)
+  
+  df <- data.frame(
+    name = content$name,
+    gender = content$gender,
+    culture = content$culture,
+    born = content$born,
+    died = content$died, stringsAsFactors = FALSE)
+  
+  Sys.sleep(1)
+  
+  df
+}
+```
+
+
+---
+
+# Your turn: solution example 2
+
+```{r eval = FALSE}
+all_pov_info <- purrr::map_df(book1_pov, get_pov_info)
+all_pov_info
+```
+
+```{r echo = FALSE}
+readRDS("data/all_pov_info.RDS")
+```
+
+
+---
+
+# Final word in APIs...
+
+<br><br><br>
+
+.center[
+## Make you life easy: 
+## If a package already exists: use it!]
+
+---
+
+class: left, middle
+
+background-image: url(images/laptop-background.jpg)
+background-size: cover
+
+# Part 2: Webscraping
+
+---
+
+background-image: url(images/webscraping_workflow.png)
+background-size: 1000px
+
+
+---
+
+# Basics of HTML
+
++ HTML = Hypertext Markup Language
++ Describes the structure of Web pages
++ Consists of *elements*:
+
+```
+      <tag> content </tag>
+```
+--
+
++ Elements can have 1 or more attributes that give additional information:
+
+```
+      <tag attribute_name = "attribute_value"> content </tag>
+```
+
+---
+
+# Basics of CSS selectors
+
++ CSS =  Cascading Style Sheets
++ Describe how the HTML structure should really look like (colors/fonts/...)
++ CSS selectors are very useful in webscraping
+
+--
+
+CSS:
+```
+      .intro {
+          color: #1F608B; 
+          font-size: 18px; 
+          font-weight: bold; }
+
+```
+
+These classes come back inside HTML:
+
+```
+      <div class = "intro"> content </div>
+
+```
+
+---
+
+# Basics of CSS selectors
+
+### How do you find out what CSS selectors you can use?
+
++ selectorgadget
+
++ Firefox/chrome: Ctrl+Shift+I then Ctrl+Shift+C to hover over parts of the site
+
+
+---
+
+background-image: url(images/webscraping_workflow.png)
+background-size: 1200px
+
+
+---
+
+background-image: url(images/API_workflow_icon1.png)
+background-position: 100% 0%
+background-size: 200px
+
+# Scraping workflow: Preparation
+
+### Step 1a: URL construction: 
+same as before!
+
+<br>
+
+--
+
+### Step 1b: Are you allowed to scrape?  
+
+```{r eval=FALSE}
+robotstxt::paths_allowed(url)
+```
+
+
+---
+
+background-image: url(images/API_workflow_icon2.png)
+background-position: 100% 0%
+background-size: 200px
+
+### Step 2: Get a local version in R
+
+The function `read_html` will return a local XML copy of the site.
+
+```{r eval=FALSE}
+library(rvest)
+local_copy <- read_html(url)
+
+```
+
+
+---
+
+background-image: url(images/WS_workflow_icon3.png)
+background-position: 100% 0%
+background-size: 200px
+
+### Step 3: Selecting the nodes you want 
+
+Selecting the parts you want with css selectors:
++ via tagname: `css = "tagname"`
++ via CSS class: `css = ".classname"`
++ via CSS ID: `css = "#IDname"`
+
+![](images/css_selectors.png)
+
+
+
+---
+
+background-image: url(images/WS_workflow_icon4.png)
+background-position: 100% 0%
+background-size: 200px
+
+### Step 4: Parse data into R
+
+The function `html_nodes` returned an XML element. To get to content:
++ parse a table: `html_table()`
++ parse the content between tags: `html_text()`
++ parse all attribute content: `html_attrs()`
++ parse the content of a specific ttribute: `html_attr(name = "attribute_name")`
+
+![](images/html_parsers.png)
+
+---
+
+background-image: url(images/webscraping_workflow_R.png)
+background-size: 1200px
+
+
+---
+
+class: center, middle
+
+
+# Demo time
+
+---
+
+class: center, middle
+
+
+# Your turn
+
+---
+
+# Your turn: exercise 1
+
+URL: https://en.wikipedia.org/wiki/R_(programming_language)  
+Task: get this table into R
+
+![](images/R_milestones.png)
+
+---
+
+# Solution: exercise 1
+
+```{r cache = TRUE, message = FALSE, warning = FALSE}
+library(rvest)
+wiki_url <- "https://en.wikipedia.org/wiki/R_(programming_language)"
+robotstxt::paths_allowed(wiki_url)
+```
+
+---
+
+# Solution: exercise 1
+
+```{r cache = TRUE, message = FALSE, warning = FALSE}
+local_wiki <- read_html(wiki_url)
+
+local_wiki %>% 
+  html_nodes(css = ".wikitable") %>% 
+  html_table()
+```
+
+
+---
+
+# Your turn: exercise 2
+
+Make a dataframe with the number of participants for 10 Datacamp R courses
+
+- Scrape links to all R courses
+- Make a function to scrape participants from a page
+- Iterate over 10 different courses (!!Sys.sleep!!)
+
+
+---
+
+# Solution: exercise 2
+
+Getting all the links to all R courses:
+
+
+```{r cache = TRUE, warning=FALSE, message=FALSE}
+library(rvest)
+library(dplyr)
+
+course_overview_url <- "https://www.datacamp.com/courses/tech:r"
+local_copy <- read_html(course_overview_url)
+
+all_course_links <- local_copy %>% 
+  html_nodes(css = ".course-block > a") %>% 
+  html_attr(name = "href")
+```
+
+
+---
+
+# Solution: exercise 2
+
+Getting all the links to all R courses:
+
+
+```{r cache = TRUE}
+all_course_links
+```
+
+
+
+---
+
+# Solution: exercise 2
+
+Getting the participants for one page
+
+
+```{r cache = TRUE}
+
+course_link <- all_course_links[1]
+url <- httr::modify_url("https://www.datacamp.com", path = course_link)
+
+robotstxt::paths_allowed(url)
+```
+
+---
+
+# Solution: exercise 2
+
+Getting the participants for one page
+
+
+```{r cache = TRUE}
+local_copy_course <- read_html(url)
+
+local_copy_course %>% 
+  html_nodes(css = ".header-hero__stat--participants") %>% 
+  html_text() %>% 
+  readr::parse_number()
+
+```
+
+---
+
+# Solution: exercise 2
+
+```{r}
+get_participants <- function(course_link) {
+  url <- httr::modify_url("https://www.datacamp.com", path = course_link)
+  allowed <- robotstxt::paths_allowed(url)
+  stopifnot(allowed == TRUE)
+  
+  local_copy <- read_html(url)
+  n_partic <- local_copy %>% 
+    html_nodes(css = ".header-hero__stat--participants") %>% 
+    html_text() %>% 
+    readr::parse_number()
+  
+  course_title <- stringr::str_remove(course_link, "/courses/")
+    df <- data.frame(date = Sys.Date(),
+                   course = course_title,
+                   participants = n_partic,
+                   stringsAsFactors = FALSE)
+  Sys.sleep(1)
+  return(df)
+}
+```
+
+
+---
+
+# Solution: exercise 2
+
+Get the number of participants for 5 courses
+
+```{r cache = TRUE, message = FALSE}
+
+purrr::map_df(all_course_links[1:5], get_participants)
+
+```
+
+
+---
+
+background-image: url(images/webscraping_workflow_R.png)
+background-size: 1200px
+
+---
+
+background-image: url(images/decision_tree.png)
+background-size: 1000px
+
+# Getting data from the web
+
+
+---
+
+
+# Webscraping Etiquette
+
+<br>
+
+1. If there is a public API available, use the API and don't scrape the info
+
+2. Always check with `robotstxt` or `polite` whether you are allowed to scrape a page
+
+3. Build system sleeps into your API or scraping requests
+
+4. Don't gather data you won't need
+
+5. Keep away from gathering PII (personal identifiable) data
+
+
+
+---
+
+background-image: url(images/polite-logo.png)
+background-position: 40% 22%
+
+# Other Resources
+
+**polite webscraping**  
+package `polite`
+
+<br>
+
+**Scraping including forms:**  
+https://stat4701.github.io/edav/2015/04/02/rvest_tutorial/
+
+<br>
+
+**Tools for Javascript rendered websites**
++ Webshot package
++ RSelenium package

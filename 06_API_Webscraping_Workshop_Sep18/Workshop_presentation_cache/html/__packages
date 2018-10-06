@@ -1,0 +1,6 @@
+base
+jsonlite
+httr
+xml2
+rvest
+dplyr

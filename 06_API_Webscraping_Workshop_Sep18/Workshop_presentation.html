@@ -1,0 +1,1502 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Working with web data</title>
+    <meta charset="utf-8">
+    <meta name="author" content="Suzan Baert" />
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link rel="stylesheet" href="css\my-fonts.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+
+
+
+
+background-image: url(images/cover.png)
+background-size: cover
+
+
+---
+
+background-image: url(images/internet.jpg)
+background-position: 85% 60%
+background-size: 600px
+
+# Getting data from the web
+
+&lt;br&gt;
+
++ Downloading files
++ Getting data from API's
++ Scraping from webpages
+
+---
+
+background-image: url(images/decision_tree.png)
+background-size: 1000px
+
+# Getting data from the web
+
+---
+
+
+# Webscraping Etiquette
+
+&lt;br&gt;
+
+1. If there is a public API available, use the API and don't scrape the info
+
+2. Always check with `robotstxt` or `polite` whether you are allowed to scrape a page
+
+3. Build system sleeps into your API or scraping requests
+
+4. Don't gather data you won't need
+
+5. Keep away from gathering PII (personal identifiable) data
+
+
+---
+
+class: left, middle
+
+background-image: url(images/laptop-background.jpg)
+background-size: cover
+
+# Part 1: API
+
+---
+
+# What is an API?
+
+.center[API = Application Programming Interface  
+"a set of subroutine definitions, communication protocols,  
+and tools for building software"]
+
+--
+
+&lt;br&gt;
+
+.center.handwritten[HUH ???]
+
+--
+
+### Examples:  
+- Travel websites getting info on flight schedule and prices
+- Getting fonts for your website (or these slides) through Google Fonts API 
+- Getting tweets with the hashtag #rstats via Twitter API
+- ...
+
+---
+
+# API communication
+
+Communication with HTTP request methods.  
+Two most common protocols:
+
+--
+
+.pull-left[
+## GET requests
+Asking the API for something
+
+```r
+library(httr)
+response &lt;- GET(url)
+content(response)
+```
+
+]
+
+--
+
+.pull-right[
+## POST requests
+Giving something to the API
+
+```r
+library(httr)
+response &lt;- POST(url, body)
+content(response)
+```
+
+]
+
+
+---
+
+# API output
+
++ Two general formats for API responses 
++ Both are plain text formats to exchange data
+
+
+.pull-left[
+**JSON**: Javascript Object Notation
+Most common these days.
+
+
+```r
+{"employees":[
+    {"firstName":"John", "lastName":"Doe"},
+    {"firstName":"Anna", "lastName":"Smith"},
+    {"firstName":"Peter", "lastName":"Jones"}
+]}
+```
+]
+
+--
+
+.pull-right[
+**XML**: Extensible Markup Language
+
+
+```r
+&lt;employees&gt;
+    &lt;employee&gt;
+        &lt;firstName&gt;John&lt;/firstName&gt; 
+        &lt;lastName&gt;Doe&lt;/lastName&gt;
+    &lt;/employee&gt;
+    &lt;employee&gt;
+        &lt;firstName&gt;Anna&lt;/firstName&gt; 
+        &lt;lastName&gt;Smith&lt;/lastName&gt;
+    &lt;/employee&gt;
+    &lt;employee&gt;
+        &lt;firstName&gt;Peter&lt;/firstName&gt; 
+        &lt;lastName&gt;Jones&lt;/lastName&gt;
+    &lt;/employee&gt;
+&lt;/employees&gt;
+```
+]
+
+---
+
+# A quick intro to JSON
+
+**Two basic forms:**
++ JSON object: `{"key": "value"}`
++ JSON array: `[1, 2, 3]` or `["a", "b", "c"]`
+
+Objects and arrays can be nested to build hierarchies.
+
+--
+
+&lt;br&gt;
+
+**For R users:**
++ JSON object ~ named value
++ JSON array ~ named vector
+
+---
+
+# A quick intro to JSON: making JSON human readable
+
+
+```r
+library(jsonlite)
+json_object &lt;- '{"organization" : "R-Ladies", "chapter": "Brussels", "start_year": 2017, "active": true, "organizers": ["Marlene", "Huong", "Suzan"]}'
+prettify(json_object)
+```
+
+```
+## {
+##     "organization": "R-Ladies",
+##     "chapter": "Brussels",
+##     "start_year": 2017,
+##     "active": true,
+##     "organizers": [
+##         "Marlene",
+##         "Huong",
+##         "Suzan"
+##     ]
+## }
+## 
+```
+
+---
+
+# A quick intro to JSON: parsing JSON to R
+
+
+
+```r
+library(jsonlite)
+fromJSON(json_object)
+```
+
+```
+## $organization
+## [1] "R-Ladies"
+## 
+## $chapter
+## [1] "Brussels"
+## 
+## $start_year
+## [1] 2017
+## 
+## $active
+## [1] TRUE
+## 
+## $organizers
+## [1] "Marlene" "Huong"   "Suzan"
+```
+
+---
+
+background-image: url(images/API_workflow.png)
+background-position: 50% 60%
+background-size: 1000px
+
+
+---
+
+# Easy example: ISS position
+
+![](images/API1_ISS.png)
+
+---
+
+background-image: url(images/API_workflow_icon1.png)
+background-position: 100% 0%
+background-size: 200px
+
+
+# Easy example: ISS position
+
+Step 1: Preparation:
+
+
+```r
+url &lt;- "http://api.open-notify.org/iss-now.json"
+```
+
+
+---
+
+background-image: url(images/API_workflow_icon2.png)
+background-position: 100% 0%
+background-size: 200px
+
+# Easy example: ISS position
+
+
+Step 2: GET request: Watch the status code!
+
+```r
+library(httr)
+response_iss &lt;- GET(url)
+response_iss
+```
+
+```
+## Response [http://api.open-notify.org/iss-now.json]
+##   Date: 2018-09-27 13:42
+##   Status: 200
+##   Content-Type: application/json
+##   Size: 114 B
+```
+
+
+---
+
+background-image: url(images/API_workflow_icon3.png)
+background-position: 100% 0%
+background-size: 200px
+
+# Easy example: ISS position
+
+Step 3: Extract and parse the response
+
+
+```r
+content_iss &lt;- content(response_iss)
+content_iss
+```
+
+```
+## $message
+## [1] "success"
+## 
+## $timestamp
+## [1] 1538055746
+## 
+## $iss_position
+## $iss_position$latitude
+## [1] "-47.4611"
+## 
+## $iss_position$longitude
+## [1] "-43.0891"
+```
+
+
+---
+
+background-image: url(images/API_workflow_icon3.png)
+background-position: 100% 0%
+background-size: 200px
+
+# Easy example: ISS position
+
+Step 4: Data wrangling in R
+
+
+```r
+ISS_position &lt;- data.frame(
+  time = content_iss$timestamp,
+  lat = content_iss$iss_position$latitude,
+  long = content_iss$iss_position$longitude)
+
+ISS_position
+```
+
+```
+##         time      lat     long
+## 1 1538055746 -47.4611 -43.0891
+```
+
+---
+
+background-image: url(images/API_workflow_R.png)
+background-position: 50% 60%
+background-size: 1000px
+
+
+
+---
+
+background-image: url(images/API_workflow_icon1.png)
+background-position: 100% 0%
+background-size: 200px
+
+
+# Prepare your request: URL-building
+
+
+Read the documentation: every API is different
+
++ Directory based URLs: `url/api/directory1/directory2`
+
++ Parameter based URLs: `url/api?param1=value1&amp;param2=value2`
+
++ A combination of both: `url/api/directory1?param1=value`
+
+--
+
+&lt;br&gt;
+
+**Examples:**
+
+Github: `https://api.github.com/repos/vmg/redcarpet/issues?state=closed`
+
+Star Wars API: `https://swapi.co/api/planets`
+
+Game of Thrones API: `https://www.anapioficeandfire.com/api/characters?page=1&amp;pageSize=10`
+
+
+---
+
+background-image: url(images/API_workflow_icon1.png)
+background-position: 100% 0%
+background-size: 200px
+
+
+# Prepare your request: URL-building
+
++ Option 1: Manual copy paste:
+
+```r
+url &lt;- "http://api.website.com/directory1?param1=value1&amp;param2=value2"
+```
+
+--
+
++ Option 2: Pasting together:
+
+```r
+url1 &lt;- paste("http://api.website.com", directory1, sep = "/")
+
+url2 &lt;- paste0("http://api.website.com/directory1?param1=", value1,
+              "&amp;param2=", value2)
+```
+
+
+--
++ Option 3: Modifying url
+
+```r
+url &lt;- modify_url(url = "http://api.website.com",
+                  path = "directory1",
+                  query = list(param1 = "value1", param2 = "value2"))
+```
+
+              
+---
+
+background-image: url(images/API_workflow_icon1.png)
+background-position: 100% 0%
+background-size: 200px
+
+
+# Prepare your request: Authentication
+
+Different types of authentication exists: 
++ username/password via `authenticate()`
++ OAuth 1.0 via `oauth_app()` and `oauth1.0_token`
++ OAuth 2.0 via `oauth_app()` and `oauth2.0_token`
+
+How to get access? 
++ Follow the documentation
++ Follow demo's: [https://github.com/r-lib/httr/tree/master/demo](https://github.com/r-lib/httr/tree/master/demo)
+
+---
+
+background-image: url(images/API_workflow_icon2.png)
+background-position: 100% 0%
+background-size: 200px
+
+
+# Step 2: GET request
+
+Basic structure:
+
+
+```r
+library(httr)
+response &lt;- GET(url, 
+                use_agent = "mycontact@email.com",
+                query = query_params,
+                authenticate("username", "password"))
+```
++ URL: base URL or full URL assembled before
++ optional but recommended: add a user-agent to describe who you are and what you're trying to do
++ optional: query with a list of query paramaters if not added to url yet
++ optional: authenticate
+
+
+---
+
+background-image: url(images/API_workflow_icon3.png)
+background-position: 100% 0%
+background-size: 200px
+
+
+# Step 3: Extract and parse the response
+
+
+```r
+library(httr)
+content &lt;- content(response)
+```
+
+By default, httr::content() automatically parses to R
++ if JSON: using jsonlite::fromJSON()
++ if XML: using xml2::read_xml()
+
+&lt;br&gt;
+
+Alternative options:
++ `content(response, as = "text")`: extracts without parsing
+
+
+---
+
+background-image: url(images/API_workflow_icon4.png)
+background-position: 100% 0%
+background-size: 200px
+
+
+# Step 4: Data wranging in R
+
+Use all your list tools to get your data in the shape you need it:
+- purrr
+- dplyr
+- rlist
+- ...
+
+
+---
+
+# Repeated API calls
+
+&lt;br&gt; 
+
++ Wrap your code in a function
++ Build a Sys.sleep() between iterations!
+
+
+---
+
+class: center, middle
+
+
+# Your turn!
+
+---
+
+# Your turn: Example 1
+
+Get the five next ISS passes above Brussels
+
+#### API Documentation: 
+http://open-notify.org/Open-Notify-API/ISS-Pass-Times/
+
+&lt;br&gt;
+
+
+#### Coordinates brussels
++ lat_bxl &lt;- 50.85045
++ long_bxl &lt;- 4.34878
+
+
+---
+
+# Your turn: solution example 1
+
+
+```r
+lat_bxl &lt;- 50.85045
+long_bxl &lt;- 4.34878
+
+#option 1: manual
+url &lt;- "http://api.open-notify.org/iss-pass.json?lat=50.85045&amp;lon=4.34878"
+
+#option 2: paste together
+url2 &lt;- paste0("http://api.open-notify.org/iss-pass.json?lat=", lat_bxl, "&amp;lon=", long_bxl)
+
+#option 3: build URL
+url3 &lt;- httr::modify_url(url = "http://api.open-notify.org",
+                  path = "iss-pass.json",
+                  query = list(lat = lat_bxl, lon = long_bxl))
+```
+
+---
+
+# Your turn: solution example 1
+
+
+```r
+#GET request
+response &lt;- GET(url3)
+
+#unpack response
+content &lt;- content(response)
+
+#modify to R
+pass_times &lt;- data.frame(
+  risetime = purrr::map_chr(content$response, "risetime"),
+  duration = purrr::map_chr(content$response, "duration"))
+
+pass_times
+```
+
+```
+##     risetime duration
+## 1 1538852887      628
+## 2 1538858707      479
+## 3 1538913262      299
+## 4 1538918841      597
+## 5 1538924587      645
+```
+
+
+
+---
+
+# Your turn: Example 2
+
+**An API of Ice and Fire**: [www.anapioficeandfire.com](www.anapioficeandfire.com)
+
++ Get the info on all the books
++ Find all book names
++ Extract the POV (point of view characters) from book 1
++ Ask the API for info on all pov characters from book 1
+
+
+
+---
+
+# Your turn: solution example 2
+
+Getting the info on all books
+
+
+```r
+library(httr)
+url &lt;- "https://www.anapioficeandfire.com/api/books"
+response_books &lt;- GET(url)
+content_books &lt;- content(response_books)
+
+#look into the book 
+str(content_books, max.level = 2)
+```
+
+```
+## List of 10
+##  $ :List of 11
+##   ..$ url          : chr "https://www.anapioficeandfire.com/api/books/1"
+##   ..$ name         : chr "A Game of Thrones"
+##   ..$ isbn         : chr "978-0553103540"
+##   ..$ authors      :List of 1
+##   ..$ numberOfPages: int 694
+##   ..$ publisher    : chr "Bantam Books"
+##   ..$ country      : chr "United States"
+##   ..$ mediaType    : chr "Hardcover"
+##   ..$ released     : chr "1996-08-01T00:00:00"
+##   ..$ characters   :List of 434
+##   ..$ povCharacters:List of 9
+##  $ :List of 11
+##   ..$ url          : chr "https://www.anapioficeandfire.com/api/books/2"
+##   ..$ name         : chr "A Clash of Kings"
+##   ..$ isbn         : chr "978-0553108033"
+##   ..$ authors      :List of 1
+##   ..$ numberOfPages: int 768
+##   ..$ publisher    : chr "Bantam Books"
+##   ..$ country      : chr "United States"
+##   ..$ mediaType    : chr "Hardback"
+##   ..$ released     : chr "1999-02-02T00:00:00"
+##   ..$ characters   :List of 778
+##   ..$ povCharacters:List of 10
+##  $ :List of 11
+##   ..$ url          : chr "https://www.anapioficeandfire.com/api/books/3"
+##   ..$ name         : chr "A Storm of Swords"
+##   ..$ isbn         : chr "978-0553106633"
+##   ..$ authors      :List of 1
+##   ..$ numberOfPages: int 992
+##   ..$ publisher    : chr "Bantam Books"
+##   ..$ country      : chr "United States"
+##   ..$ mediaType    : chr "Hardcover"
+##   ..$ released     : chr "2000-10-31T00:00:00"
+##   ..$ characters   :List of 1021
+##   ..$ povCharacters:List of 12
+##  $ :List of 11
+##   ..$ url          : chr "https://www.anapioficeandfire.com/api/books/4"
+##   ..$ name         : chr "The Hedge Knight"
+##   ..$ isbn         : chr "978-0976401100"
+##   ..$ authors      :List of 1
+##   ..$ numberOfPages: int 164
+##   ..$ publisher    : chr "Dabel Brothers Publishing"
+##   ..$ country      : chr "United States"
+##   ..$ mediaType    : chr "GraphicNovel"
+##   ..$ released     : chr "2005-03-09T00:00:00"
+##   ..$ characters   :List of 54
+##   ..$ povCharacters:List of 1
+##  $ :List of 11
+##   ..$ url          : chr "https://www.anapioficeandfire.com/api/books/5"
+##   ..$ name         : chr "A Feast for Crows"
+##   ..$ isbn         : chr "978-0553801507"
+##   ..$ authors      :List of 1
+##   ..$ numberOfPages: int 784
+##   ..$ publisher    : chr "Bantam Books"
+##   ..$ country      : chr "United Status"
+##   ..$ mediaType    : chr "Hardcover"
+##   ..$ released     : chr "2005-11-08T00:00:00"
+##   ..$ characters   :List of 1241
+##   ..$ povCharacters:List of 12
+##  $ :List of 11
+##   ..$ url          : chr "https://www.anapioficeandfire.com/api/books/6"
+##   ..$ name         : chr "The Sworn Sword"
+##   ..$ isbn         : chr "978-0785126508"
+##   ..$ authors      :List of 1
+##   ..$ numberOfPages: int 152
+##   ..$ publisher    : chr "Marvel"
+##   ..$ country      : chr "United States"
+##   ..$ mediaType    : chr "Hardcover"
+##   ..$ released     : chr "2008-06-18T00:00:00"
+##   ..$ characters   :List of 84
+##   ..$ povCharacters:List of 1
+##  $ :List of 11
+##   ..$ url          : chr "https://www.anapioficeandfire.com/api/books/7"
+##   ..$ name         : chr "The Mystery Knight"
+##   ..$ isbn         : chr "978-0765360267"
+##   ..$ authors      :List of 1
+##   ..$ numberOfPages: int 416
+##   ..$ publisher    : chr "Tor Fantasy"
+##   ..$ country      : chr "United States"
+##   ..$ mediaType    : chr "Paperback"
+##   ..$ released     : chr "2011-03-29T00:00:00"
+##   ..$ characters   :List of 71
+##   ..$ povCharacters:List of 1
+##  $ :List of 11
+##   ..$ url          : chr "https://www.anapioficeandfire.com/api/books/8"
+##   ..$ name         : chr "A Dance with Dragons"
+##   ..$ isbn         : chr "978-0553801477"
+##   ..$ authors      :List of 1
+##   ..$ numberOfPages: int 1040
+##   ..$ publisher    : chr "Bantam Books"
+##   ..$ country      : chr "United States"
+##   ..$ mediaType    : chr "Hardcover"
+##   ..$ released     : chr "2011-07-12T00:00:00"
+##   ..$ characters   :List of 861
+##   ..$ povCharacters:List of 18
+##  $ :List of 11
+##   ..$ url          : chr "https://www.anapioficeandfire.com/api/books/9"
+##   ..$ name         : chr "The Princess and the Queen"
+##   ..$ isbn         : chr "978-0765332066"
+##   ..$ authors      :List of 1
+##   ..$ numberOfPages: int 784
+##   ..$ publisher    : chr "Tor Books"
+##   ..$ country      : chr "United States"
+##   ..$ mediaType    : chr "Hardcover"
+##   ..$ released     : chr "2013-12-03T00:00:00"
+##   ..$ characters   :List of 57
+##   ..$ povCharacters: list()
+##  $ :List of 11
+##   ..$ url          : chr "https://www.anapioficeandfire.com/api/books/10"
+##   ..$ name         : chr "The Rogue Prince"
+##   ..$ isbn         : chr "978-0345537263"
+##   ..$ authors      :List of 1
+##   ..$ numberOfPages: int 832
+##   ..$ publisher    : chr "Bantam Books"
+##   ..$ country      : chr "United States"
+##   ..$ mediaType    : chr "Hardcover"
+##   ..$ released     : chr "2014-06-17T00:00:00"
+##   ..$ characters   :List of 55
+##   ..$ povCharacters: list()
+```
+
+
+---
+
+# Your turn: solution example 2
+
+Find all book names
+
+
+```r
+purrr::map_chr(content_books, "name")
+```
+
+```
+##  [1] "A Game of Thrones"          "A Clash of Kings"          
+##  [3] "A Storm of Swords"          "The Hedge Knight"          
+##  [5] "A Feast for Crows"          "The Sworn Sword"           
+##  [7] "The Mystery Knight"         "A Dance with Dragons"      
+##  [9] "The Princess and the Queen" "The Rogue Prince"
+```
+
+
+---
+
+# Your turn: solution example 2
+
+Extract the POV (point of view characters) from book 1
+
+
+
+```r
+content_book1 &lt;- content_books[[1]]
+book1_pov &lt;- content_book1$povCharacters
+book1_pov &lt;- unlist(book1_pov)
+book1_pov
+```
+
+```
+## [1] "https://www.anapioficeandfire.com/api/characters/148" 
+## [2] "https://www.anapioficeandfire.com/api/characters/208" 
+## [3] "https://www.anapioficeandfire.com/api/characters/232" 
+## [4] "https://www.anapioficeandfire.com/api/characters/339" 
+## [5] "https://www.anapioficeandfire.com/api/characters/583" 
+## [6] "https://www.anapioficeandfire.com/api/characters/957" 
+## [7] "https://www.anapioficeandfire.com/api/characters/1052"
+## [8] "https://www.anapioficeandfire.com/api/characters/1109"
+## [9] "https://www.anapioficeandfire.com/api/characters/1303"
+```
+
+
+---
+
+# Your turn: solution example 2
+
+Call the API for info on first character
+
+
+```r
+url1 &lt;- book1_pov[1]
+response &lt;- GET(url1)
+content &lt;- content(response)
+
+data.frame(name = content$name,
+  gender = content$gender,
+  culture = content$culture,
+  born = content$born,
+  died = content$died)
+```
+
+```
+##         name gender  culture                     born died
+## 1 Arya Stark Female Northmen In 289 AC, at Winterfell
+```
+
+---
+
+# Your turn: solution example 2
+
+Wrap it inside a function:
+
+
+```r
+get_pov_info &lt;- function(url) {
+  response &lt;- GET(url)
+  content &lt;- content(response)
+  
+  df &lt;- data.frame(
+    name = content$name,
+    gender = content$gender,
+    culture = content$culture,
+    born = content$born,
+    died = content$died, stringsAsFactors = FALSE)
+  
+  Sys.sleep(1)
+  
+  df
+}
+```
+
+
+---
+
+# Your turn: solution example 2
+
+
+```r
+all_pov_info &lt;- purrr::map_df(book1_pov, get_pov_info)
+all_pov_info
+```
+
+
+```
+##                 name gender  culture                        born
+## 1         Arya Stark Female Northmen    In 289 AC, at Winterfell
+## 2      Brandon Stark   Male Northmen    In 290 AC, at Winterfell
+## 3      Catelyn Stark Female Rivermen      In 264 AC, at Riverrun
+## 4       Eddard Stark   Male Northmen    In 263 AC, at Winterfell
+## 5           Jon Snow   Male Northmen                   In 283 AC
+## 6        Sansa Stark Female Northmen    In 286 AC, at Winterfell
+## 7   Tyrion Lannister   Male          In 273 AC, at Casterly Rock
+## 8               Will   Male                                     
+## 9 Daenerys Targaryen Female Valyrian   In 284 AC, at Dragonstone
+##                                                   died
+## 1                                                     
+## 2                                                     
+## 3                              In 299 AC, at the Twins
+## 4 In 299 AC, at Great Sept of Baelor in King's Landing
+## 5                                                     
+## 6                                                     
+## 7                                                     
+## 8                         In 297 AC, at Haunted Forest
+## 9
+```
+
+
+---
+
+# Final word in APIs...
+
+&lt;br&gt;&lt;br&gt;&lt;br&gt;
+
+.center[
+## Make you life easy: 
+## If a package already exists: use it!]
+
+---
+
+class: left, middle
+
+background-image: url(images/laptop-background.jpg)
+background-size: cover
+
+# Part 2: Webscraping
+
+---
+
+background-image: url(images/webscraping_workflow.png)
+background-size: 1000px
+
+
+---
+
+# Basics of HTML
+
++ HTML = Hypertext Markup Language
++ Describes the structure of Web pages
++ Consists of *elements*:
+
+```
+      &lt;tag&gt; content &lt;/tag&gt;
+```
+--
+
++ Elements can have 1 or more attributes that give additional information:
+
+```
+      &lt;tag attribute_name = "attribute_value"&gt; content &lt;/tag&gt;
+```
+
+---
+
+# Basics of CSS selectors
+
++ CSS =  Cascading Style Sheets
++ Describe how the HTML structure should really look like (colors/fonts/...)
++ CSS selectors are very useful in webscraping
+
+--
+
+CSS:
+```
+      .intro {
+          color: #1F608B; 
+          font-size: 18px; 
+          font-weight: bold; }
+
+```
+
+These classes come back inside HTML:
+
+```
+      &lt;div class = "intro"&gt; content &lt;/div&gt;
+
+```
+
+---
+
+# Basics of CSS selectors
+
+### How do you find out what CSS selectors you can use?
+
++ selectorgadget
+
++ Firefox/chrome: Ctrl+Shift+I then Ctrl+Shift+C to hover over parts of the site
+
+
+---
+
+background-image: url(images/webscraping_workflow.png)
+background-size: 1200px
+
+
+---
+
+background-image: url(images/API_workflow_icon1.png)
+background-position: 100% 0%
+background-size: 200px
+
+# Scraping workflow: Preparation
+
+### Step 1a: URL construction: 
+same as before!
+
+&lt;br&gt;
+
+--
+
+### Step 1b: Are you allowed to scrape?  
+
+
+```r
+robotstxt::paths_allowed(url)
+```
+
+
+---
+
+background-image: url(images/API_workflow_icon2.png)
+background-position: 100% 0%
+background-size: 200px
+
+### Step 2: Get a local version in R
+
+The function `read_html` will return a local XML copy of the site.
+
+
+```r
+library(rvest)
+local_copy &lt;- read_html(url)
+```
+
+
+---
+
+background-image: url(images/WS_workflow_icon3.png)
+background-position: 100% 0%
+background-size: 200px
+
+### Step 3: Selecting the nodes you want 
+
+Selecting the parts you want with css selectors:
++ via tagname: `css = "tagname"`
++ via CSS class: `css = ".classname"`
++ via CSS ID: `css = "#IDname"`
+
+![](images/css_selectors.png)
+
+
+
+---
+
+background-image: url(images/WS_workflow_icon4.png)
+background-position: 100% 0%
+background-size: 200px
+
+### Step 4: Parse data into R
+
+The function `html_nodes` returned an XML element. To get to content:
++ parse a table: `html_table()`
++ parse the content between tags: `html_text()`
++ parse all attribute content: `html_attrs()`
++ parse the content of a specific ttribute: `html_attr(name = "attribute_name")`
+
+![](images/html_parsers.png)
+
+---
+
+background-image: url(images/webscraping_workflow_R.png)
+background-size: 1200px
+
+
+---
+
+class: center, middle
+
+
+# Demo time
+
+---
+
+class: center, middle
+
+
+# Your turn
+
+---
+
+# Your turn: exercise 1
+
+URL: https://en.wikipedia.org/wiki/R_(programming_language)  
+Task: get this table into R
+
+![](images/R_milestones.png)
+
+---
+
+# Solution: exercise 1
+
+
+```r
+library(rvest)
+wiki_url &lt;- "https://en.wikipedia.org/wiki/R_(programming_language)"
+robotstxt::paths_allowed(wiki_url)
+```
+
+```
+## [1] TRUE
+```
+
+---
+
+# Solution: exercise 1
+
+
+```r
+local_wiki &lt;- read_html(wiki_url)
+
+local_wiki %&gt;% 
+  html_nodes(css = ".wikitable") %&gt;% 
+  html_table()
+```
+
+```
+## [[1]]
+##    Release       Date
+## 1     0.16           
+## 2     0.49 1997-04-23
+## 3     0.60 1997-12-05
+## 4   0.65.1 1999-10-07
+## 5      1.0 2000-02-29
+## 6      1.4 2001-12-19
+## 7      2.0 2004-10-04
+## 8      2.1 2005-04-18
+## 9     2.11 2010-04-22
+## 10    2.13 2011-04-14
+## 11    2.14 2011-10-31
+## 12    2.15 2012-03-30
+## 13     3.0 2013-04-03
+## 14     3.4 2017-04-21
+## 15     3.5 2018-04-23
+##                                                                                                                                                                                                                                                                                         Description
+## 1                                                                                   This is the last alpha version developed primarily by Ihaka and Gentleman. Much of the basic functionality from the "White Book" (see S history) was implemented. The mailing lists commenced on April 1, 1997.
+## 2  This is the oldest source release which is currently available on CRAN.[46] CRAN is started on this date, with 3 mirrors that initially hosted 12 packages.[47] Alpha versions of R for Microsoft Windows and the classic Mac OS are made available shortly after this version.[citation needed]
+## 3                                                                                                                                                                                                          R becomes an official part of the GNU Project. The code is hosted and maintained on CVS.
+## 4                                                                                                                                                                           First versions of update.packages and install.packages functions for downloading and installing packages from CRAN.[48]
+## 5                                                                                                                                                                                                                                Considered by its developers stable enough for production use.[49]
+## 6                                                                                                                                                                                                        S4 methods are introduced and the first version for Mac OS X is made available soon after.
+## 7                                                                                                                                                                                                Introduced lazy loading, which enables fast loading of data with minimal expense of system memory.
+## 8                                                                                                                                                                                  Support for UTF-8 encoding, and the beginnings of internationalization and localization for different languages.
+## 9                                                                                                                                                                                                                                                               Support for Windows 64 bit systems.
+## 10                                                                                                                                                                                                Adding a new compiler function that allows speeding up functions by converting them to byte-code.
+## 11                                                                                                                                                                                                                           Added mandatory namespaces for packages. Added a new parallel package.
+## 12                                                                                                                                                                                                                     New load balancing functions. Improved serialisation speed for long vectors.
+## 13                                                                                                                                                                                                                               Support for numeric index values 231 and larger on 64 bit systems.
+## 14                                                                                                                                                                                                           Just-in-time compilation (JIT) of functions and loops to byte-code enabled by default.
+## 15                                                                                                           Packages byte-compiled on installation by default. Compact internal representation of integer sequences. Added a new serialisation format to support compact internal representations.
+```
+
+
+---
+
+# Your turn: exercise 2
+
+Make a dataframe with the number of participants for 10 Datacamp R courses
+
+- Scrape links to all R courses
+- Make a function to scrape participants from a page
+- Iterate over 10 different courses (!!Sys.sleep!!)
+
+
+---
+
+# Solution: exercise 2
+
+Getting all the links to all R courses:
+
+
+
+```r
+library(rvest)
+library(dplyr)
+
+course_overview_url &lt;- "https://www.datacamp.com/courses/tech:r"
+local_copy &lt;- read_html(course_overview_url)
+
+all_course_links &lt;- local_copy %&gt;% 
+  html_nodes(css = ".course-block &gt; a") %&gt;% 
+  html_attr(name = "href")
+```
+
+
+---
+
+# Solution: exercise 2
+
+Getting all the links to all R courses:
+
+
+
+```r
+all_course_links
+```
+
+```
+##   [1] "/courses/free-introduction-to-r"                                
+##   [2] "/courses/data-table-data-manipulation-r-tutorial"               
+##   [3] "/courses/dplyr-data-manipulation-r-tutorial"                    
+##   [4] "/courses/ggvis-data-visualization-r-tutorial"                   
+##   [5] "/courses/reporting-with-r-markdown"                             
+##   [6] "/courses/intermediate-r"                                        
+##   [7] "/courses/introduction-to-machine-learning-with-r"               
+##   [8] "/courses/cleaning-data-in-r"                                    
+##   [9] "/courses/intermediate-r-practice"                               
+##  [10] "/courses/data-visualization-with-ggplot2-1"                     
+##  [11] "/courses/data-visualization-with-ggplot2-2"                     
+##  [12] "/courses/data-visualization-with-ggplot2-part-3"                
+##  [13] "/courses/intro-to-text-mining-bag-of-words"                     
+##  [14] "/courses/exploring-pitch-data-with-r"                           
+##  [15] "/courses/working-with-the-rstudio-ide-part-1"                   
+##  [16] "/courses/introduction-to-portfolio-analysis-in-r"               
+##  [17] "/courses/introduction-to-credit-risk-modeling-in-r"             
+##  [18] "/courses/machine-learning-toolbox"                              
+##  [19] "/courses/working-with-the-rstudio-ide-part-2"                   
+##  [20] "/courses/joining-data-in-r-with-dplyr"                          
+##  [21] "/courses/manipulating-time-series-data-in-r-with-xts-zoo"       
+##  [22] "/courses/introduction-to-time-series-analysis"                  
+##  [23] "/courses/importing-cleaning-data-in-r-case-studies"             
+##  [24] "/courses/financial-trading-in-r"                                
+##  [25] "/courses/importing-and-managing-financial-data-in-r"            
+##  [26] "/courses/exploratory-data-analysis-in-r-case-study"             
+##  [27] "/courses/importing-data-in-r-part-1"                            
+##  [28] "/courses/importing-data-in-r-part-2"                            
+##  [29] "/courses/data-visualization-in-r"                               
+##  [30] "/courses/writing-functions-in-r"                                
+##  [31] "/courses/statistical-modeling-in-r-part-1"                      
+##  [32] "/courses/statistical-modeling-in-r-part-2"                      
+##  [33] "/courses/intermediate-portfolio-analysis-in-r"                  
+##  [34] "/courses/bond-valuation-and-analysis-in-r"                      
+##  [35] "/courses/foundations-of-inference"                              
+##  [36] "/courses/exploratory-data-analysis"                             
+##  [37] "/courses/correlation-and-regression"                            
+##  [38] "/courses/introduction-to-data"                                  
+##  [39] "/courses/arima-modeling-with-r"                                 
+##  [40] "/courses/unsupervised-learning-in-r"                            
+##  [41] "/courses/working-with-geospatial-data-in-r"                     
+##  [42] "/courses/manipulating-time-series-data-in-r-case-studies"       
+##  [43] "/courses/object-oriented-programming-in-r-s3-and-r6"            
+##  [44] "/courses/sentiment-analysis-in-r"                               
+##  [45] "/courses/visualizing-time-series-data-in-r"                     
+##  [46] "/courses/valuation-of-life-insurance-products-in-r"             
+##  [47] "/courses/foundations-of-probability-in-r"                       
+##  [48] "/courses/scalable-data-processing-in-r"                         
+##  [49] "/courses/introduction-to-r-for-finance"                         
+##  [50] "/courses/intermediate-r-for-finance"                            
+##  [51] "/courses/supervised-learning-in-r-classification"               
+##  [52] "/courses/string-manipulation-in-r-with-stringr"                 
+##  [53] "/courses/writing-efficient-r-code"                              
+##  [54] "/courses/forecasting-using-r"                                   
+##  [55] "/courses/machine-learning-with-tree-based-models-in-r"          
+##  [56] "/courses/working-with-web-data-in-r"                            
+##  [57] "/courses/quantitative-risk-management-in-r"                     
+##  [58] "/courses/spatial-statistics-in-r"                               
+##  [59] "/courses/data-visualization-in-r-with-lattice"                  
+##  [60] "/courses/introduction-to-spark-in-r-using-sparklyr"             
+##  [61] "/courses/sentiment-analysis-in-r-the-tidy-way"                  
+##  [62] "/courses/multiple-and-logistic-regression"                      
+##  [63] "/courses/inference-for-linear-regression"                       
+##  [64] "/courses/equity-valuation-in-r"                                 
+##  [65] "/courses/building-web-applications-in-r-with-shiny-case-studies"
+##  [66] "/courses/supervised-learning-in-r-regression"                   
+##  [67] "/courses/spatial-analysis-in-r-with-sf-and-raster"              
+##  [68] "/courses/network-analysis-in-r"                                 
+##  [69] "/courses/building-web-applications-in-r-with-shiny"             
+##  [70] "/courses/introduction-to-the-tidyverse"                         
+##  [71] "/courses/developing-r-packages"                                 
+##  [72] "/courses/inference-for-numerical-data"                          
+##  [73] "/courses/fundamentals-of-bayesian-data-analysis-in-r"           
+##  [74] "/courses/working-with-dates-and-times-in-r"                     
+##  [75] "/courses/cluster-analysis-in-r"                                 
+##  [76] "/courses/inference-for-categorical-data"                        
+##  [77] "/courses/building-dashboards-with-flexdashboard"                
+##  [78] "/courses/communicating-with-data-in-the-tidyverse"              
+##  [79] "/courses/chip-seq-workflows-in-r"                               
+##  [80] "/courses/visualization-best-practices-in-r"                     
+##  [81] "/courses/building-dashboards-with-shinydashboard"               
+##  [82] "/courses/modeling-with-data-in-the-tidyverse"                   
+##  [83] "/courses/human-resources-analytics-in-r-exploring-employee-data"
+##  [84] "/courses/business-process-analytics-in-r"                       
+##  [85] "/courses/working-with-data-in-the-tidyverse"                    
+##  [86] "/courses/supervised-learning-in-r-case-studies"                 
+##  [87] "/courses/forecasting-product-demand-in-r"                       
+##  [88] "/courses/marketing-analytics-in-r-statistical-modeling"         
+##  [89] "/courses/network-analysis-in-r-case-studies"                    
+##  [90] "/courses/hierarchical-and-mixed-effects-models"                 
+##  [91] "/courses/parallel-programming-in-r"                             
+##  [92] "/courses/introduction-to-bioconductor"                          
+##  [93] "/courses/data-privacy-and-anonymization-in-r"                   
+##  [94] "/courses/nonlinear-modeling-in-r-with-gams"                     
+##  [95] "/courses/bayesian-modeling-with-rjags"                          
+##  [96] "/courses/structural-equation-modeling-with-lavaan-in-r"         
+##  [97] "/courses/differential-expression-analysis-in-r-with-limma"      
+##  [98] "/courses/factor-analysis-in-r"                                  
+##  [99] "/courses/marketing-analytics-in-r-choice-modeling"              
+## [100] "/courses/categorical-data-in-the-tidyverse"                     
+## [101] "/courses/experimental-design-in-r"                              
+## [102] "/courses/bayesian-regression-modeling-with-rstanarm"            
+## [103] "/courses/analyzing-survey-data-in-r"                            
+## [104] "/courses/mixture-models-in-r"                                   
+## [105] "/courses/network-science-in-r-a-tidy-approach"                  
+## [106] "/courses/support-vector-machines-in-r"                          
+## [107] "/courses/interactive-maps-with-leaflet-in-r"                    
+## [108] "/courses/ab-testing-in-r"                                       
+## [109] "/courses/analyzing-us-census-data-in-r"                         
+## [110] "/courses/interactive-data-visualization-with-rbokeh"            
+## [111] "/courses/machine-learning-in-the-tidyverse"                     
+## [112] "/courses/predictive-analytics-using-networked-data-in-r"        
+## [113] "/courses/single-cell-rna-seq-workflows-in-r"                    
+## [114] "/courses/generalized-linear-models-in-r"
+```
+
+
+
+---
+
+# Solution: exercise 2
+
+Getting the participants for one page
+
+
+
+```r
+course_link &lt;- all_course_links[1]
+url &lt;- httr::modify_url("https://www.datacamp.com", path = course_link)
+
+robotstxt::paths_allowed(url)
+```
+
+```
+## 
+ www.datacamp.com
+```
+
+```
+## [1] TRUE
+```
+
+---
+
+# Solution: exercise 2
+
+Getting the participants for one page
+
+
+
+```r
+local_copy_course &lt;- read_html(url)
+
+local_copy_course %&gt;% 
+  html_nodes(css = ".header-hero__stat--participants") %&gt;% 
+  html_text() %&gt;% 
+  readr::parse_number()
+```
+
+```
+## [1] 962611
+```
+
+---
+
+# Solution: exercise 2
+
+
+```r
+get_participants &lt;- function(course_link) {
+  url &lt;- httr::modify_url("https://www.datacamp.com", path = course_link)
+  allowed &lt;- robotstxt::paths_allowed(url)
+  stopifnot(allowed == TRUE)
+  
+  local_copy &lt;- read_html(url)
+  n_partic &lt;- local_copy %&gt;% 
+    html_nodes(css = ".header-hero__stat--participants") %&gt;% 
+    html_text() %&gt;% 
+    readr::parse_number()
+  
+  course_title &lt;- stringr::str_remove(course_link, "/courses/")
+    df &lt;- data.frame(date = Sys.Date(),
+                   course = course_title,
+                   participants = n_partic,
+                   stringsAsFactors = FALSE)
+  Sys.sleep(1)
+  return(df)
+}
+```
+
+
+---
+
+# Solution: exercise 2
+
+Get the number of participants for 5 courses
+
+
+```r
+purrr::map_df(all_course_links[1:5], get_participants)
+```
+
+```
+##         date                                  course participants
+## 1 2018-09-27                  free-introduction-to-r       962624
+## 2 2018-09-27 data-table-data-manipulation-r-tutorial        51647
+## 3 2018-09-27      dplyr-data-manipulation-r-tutorial        83098
+## 4 2018-09-27     ggvis-data-visualization-r-tutorial        39073
+## 5 2018-09-27               reporting-with-r-markdown        52342
+```
+
+
+---
+
+background-image: url(images/webscraping_workflow_R.png)
+background-size: 1200px
+
+---
+
+background-image: url(images/decision_tree.png)
+background-size: 1000px
+
+# Getting data from the web
+
+
+---
+
+
+# Webscraping Etiquette
+
+&lt;br&gt;
+
+1. If there is a public API available, use the API and don't scrape the info
+
+2. Always check with `robotstxt` or `polite` whether you are allowed to scrape a page
+
+3. Build system sleeps into your API or scraping requests
+
+4. Don't gather data you won't need
+
+5. Keep away from gathering PII (personal identifiable) data
+
+
+
+---
+
+background-image: url(images/polite-logo.png)
+background-position: 40% 22%
+
+# Other Resources
+
+**polite webscraping**  
+package `polite`
+
+&lt;br&gt;
+
+**Scraping including forms:**  
+https://stat4701.github.io/edav/2015/04/02/rvest_tutorial/
+
+&lt;br&gt;
+
+**Tools for Javascript rendered websites**
++ Webshot package
++ RSelenium package
+    </textarea>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"ratio": "16:9",
+"highlightStyle": "github",
+"highlightLines": true,
+"slideNumberFormat": ""
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function() {
+  var d = document, s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})();</script>
+
+<script>
+(function() {
+  var i, text, code, codes = document.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+})();
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://cdn.bootcss.com/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
