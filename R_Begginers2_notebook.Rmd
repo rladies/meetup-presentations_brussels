@@ -1,0 +1,229 @@
+---
+title: "R for beginners 2"
+author: "Huong & Marlene"
+output: html_notebook
+---
+
+### Agenda:
+
++ Softwares installation (in case you do not have R or Rstudio installed)
++ About the database
++ Exploration and manipulation
++ Missing values
++ Outliers
++ Some filtering
++ Questions/Discussion
+
+
+---
+
+### Softwares installation
+
+If you do not have R or Rstudio intalled, use the followig links
+
+- Download and install R: [https://www.r-project.org/]
+
+- Download and install Rstudio: [https://www.rstudio.com/products/rstudio/download/]
+
+
+---
+
+### About the database
+
+We are going to work with a database from STATBEL, the Belgian statistical office, which describes the population by place of residence, nationality, marital status, age and sexstructure.  
+
+Download the data set from here (txt file recommended):
+
+https://statbel.fgov.be/en/open-data/population-place-residence-nationality-marital-status-age-and-sex-8
+
+
+
+Verify your work directory 
+```{r}
+getwd()
+```
+
+if necessary set your work directory to the path where you saved the  database. In my case :
+```{r}
+input = "C:/Users/marlene/Documents/Rladies/RLadiesWorkshops/rbiginners2"
+
+setwd(input)
+```
+
+Load the dataset into R
+```{r pop}
+
+pop <- read.table("TF_SOC_POP_STRUCT_2018.txt", header=T, sep="|", stringsAsFactors = F,  encoding = "UTF-8")
+
+```
+
+### Exploration and manipulation
+The dataset is quite big, do not call it directly. Let's see the first five rows
+
+```{r}
+head(pop, 5)
+```
+
+what about the dimension ?
+
+```{r}
+dim(pop)
+```
+
+and what about the structure of the dataset ?
+
+```{r}
+str(pop)
+```
+
+
+#### **Your turn !**
+
+*Exercice 1*:change the name of column 20, from "CD_AGE" to "age"
+
+Hint : use colnames()
+
+```{r}
+colnames(pop)
+```
+
+```{r}
+# Solution
+#which(colnames(pop)=="CD_AGE")
+colnames(pop)[20] <- "age"
+```
+
+### More functions
+
+```{r}
+typeof(pop)
+```
+```{r}
+class(pop)
+```
+
+```{r}
+length(pop)
+
+```
+
+```{r}
+pop[20]
+```
+
+
+
+### Missing Values
+
+We have missing values when no data value is stored for a variable. 
+Let's verify is the dataset has missing values.
+```{r}
+anyNA(pop)
+```
+How many missing values do we have ?
+```{r}
+sum(is.na(pop))
+```
+```{r}
+sum(is.na(pop$age))
+```
+
+
+#### **Your turn !**
+
+*Exercice 2*: Where are the missig values ?
+
+Hint : you can use sapply or which functions
+```{r}
+apply(is.na(pop),2,sum)
+```
+
+
+```{r}
+which(is.na(pop),arr.ind=T)
+```  
+
+```{r}
+pop[58208,7]
+```
+### Outliers
+
+Outliers are those data points that are really far from the rest. We use the mean as reference.
+
+```{r}
+summary(pop[1])
+```
+
+Formally outliers are usually defined as  observations that are more than three standard deviations from the mean. 
+
+We can visualize outliers using the boxplot 
+
+```{r}
+boxplot(pop[1])
+```
+
+
+
+#### **Your turn !**
+
+*Exercice 3*: Use boxplot() function to try to find if the dataset has outliers
+
+Hint : verify only colums with int values
+
+```{r}
+boxplot(pop[21])
+```
+
+Note: We will show later a more clever solution
+
+### Some filtering
+
+Get only females and keep all other columns
+
+```{r}
+female_pop = pop[pop$CD_SEX == "F", ]
+head(female_pop, 7) 
+```
+
+get females and foreigners
+
+```{r}
+female_foreign = female_pop[female_pop$CD_NATLTY == "ETR", ]
+head(female_foreign,7)
+```
+
+get males
+
+```{r}
+males_foreign =pop[pop$CD_NATLTY == "ETR" & pop$CD_SEX == "M", ]
+head(males_foreign,7)
+```
+
+Now let's see some contingency tables. For instance, here we have a two dimensional table which show the number of female and males by regions
+
+```{r}
+ table(pop$TX_PROV_DESCR_FR, 
+      pop$CD_SEX)
+```
+
+a three dimensional table
+```{r}
+ table(pop$TX_RGN_DESCR_FR, 
+      pop$CD_NATLTY,
+      pop$CD_SEX)
+```
+
+### What we have learned today? 
+
+New R functions:
+
+- class()   retrieves the internal class of an object
+- is.na()   indicates which elements are missing (logical)
+- anyNA()   basically implements any(is.na(x)).
+- which()   returns the position of the elements in a logical vector 
+- apply()   it applys a function to margins of an array or matrix
+- summary() used to produce result summaries
+- boxplot() produce box-and-whisker plot(s) 
+- table()   builds a contingency table 
+
+### Thanks for comming !!!
